@@ -1,4 +1,4 @@
-# RangeForge — Train. Attack. Defend.
+# Cyber-Lab — Train. Attack. Defend.
 
 An enterprise-grade cyber range platform providing realistic, isolated cybersecurity training environments with live Kali Linux & Ubuntu lab orchestration, interactive xterm.js PTY terminals, KasmVNC streaming, and complete operator progress tracking.
 
