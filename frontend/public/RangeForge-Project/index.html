@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cyber Lab — Train. Attack. Defend. Elite cybersecurity training platform with live Kali and Ubuntu environments.">
+  <title>Cyber Lab · Train. Attack. Defend</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300f0ff'/%3E%3Cstop offset='100%25' stop-color='%2310b981'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0e17'/%3E%3Cpath d='M19 5L8 18h7l-3 9 12-14h-8z' fill='url(%23g)'/%3E%3C/svg%3E">
+  
+  <!-- Modern Google Fonts: Plus Jakarta Sans, Space Grotesk, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <meta name="color-scheme" content="dark light">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('range-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      try {
+        const auth = JSON.parse(localStorage.getItem('cyberlab-auth') || localStorage.getItem('rangeforge-auth') || '{}');
+        if (!auth || !auth.isLoggedIn) {
+          document.documentElement.classList.add('auth-mode');
+        }
+      } catch (e) {
+        document.documentElement.classList.add('auth-mode');
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="style.css?v=2.9">
+  
+  <!-- xterm.js Terminal Emulator for Real PTY Stream -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+</head>
+<body>
+  <div class="cyber-bg-grid" aria-hidden="true"></div>
+  <div class="cyber-bg-glow" aria-hidden="true"></div>
+
+  <aside class="sidebar">
+    <div class="brand-container">
+      <a class="brand" href="/" aria-label="Cyber Lab home">
+        <span class="brandmark">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </span>
+        <span class="brandtext">CyberLab<span class="branddot">.</span></span>
+      </a>
+      <div class="brand-tagline">
+        <span>Train</span>
+        <span class="tagline-dot">·</span>
+        <span>Attack</span>
+        <span class="tagline-dot">·</span>
+        <span>Defend</span>
+      </div>
+    </div>
+    <div class="team">
+      <span class="teamicon">CL</span>
+      <div>
+        <strong>CyberLab Pro</strong>
+        <small>Community Tier</small>
+      </div>
+    </div>
+    <div class="navlabel">NAVIGATION</div>
+    <nav>
+      <button class="nav active" data-nav="labs">
+        <span class="navicon">▦</span>
+        <span class="navtext">Lab catalog</span>
+        <small id="catalog-badge">07</small>
+      </button>
+      <button class="nav" data-nav="session">
+        <span class="navicon">▣</span>
+        <span class="navtext">My session</span>
+        <i id="session-dot"></i>
+      </button>
+      <button class="nav" data-nav="progress">
+        <span class="navicon">◴</span>
+        <span class="navtext">My progress</span>
+      </button>
+    </nav>
+    <div class="sidebottom">
+      <div class="practice">
+        <div class="practice-header">
+          <span class="practice-badge">TARGET HUD</span>
+          <span class="practice-icon">⚡</span>
+        </div>
+        <strong>Hands-on Labs</strong>
+        <p>Real targets. Isolated environments. Zero risk.</p>
+        <div class="tinyline"></div>
+      </div>
+      <div class="profile" id="profile-card">
+        <div class="avatar" id="profile-avatar">KB</div>
+        <div class="profile-info">
+          <strong id="profile-name">Kartik Baniwal</strong>
+          <small><span class="online-dot"></span><span id="profile-role">Security Analyst</span></small>
+        </div>
+        <button class="profilegear" id="open-settings" aria-label="Open workspace settings" title="Workspace settings">⚙</button>
+        <button class="profilesignout" id="sidebar-logout-btn" aria-label="Sign out" title="Log Out" style="display: none;">⇥</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app">
+    <header>
+      <div class="breadcrumb">
+        <a href="/" class="crumb-root" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 4px;" title="Return to Portal"><span class="crumb-brandmark">⚡</span> Cyber Lab Portal</a>
+        <span class="crumb-sep">/</span>
+        <b id="crumb">Lab catalog</b>
+      </div>
+      <div class="headright">
+        <button id="auth-btn" class="auth-header-btn" aria-label="Operator Authentication" title="Operator Sign In / Profile">
+          <span class="auth-btn-icon">⌑</span>
+          <span id="auth-btn-text">Sign In</span>
+        </button>
+        <button id="header-logout-btn" class="header-logout-btn" aria-label="Log Out" title="Sign out of operator session" style="display: none;">
+          <span class="logout-icon">⇥</span>
+          <span>Log Out</span>
+        </button>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark and light theme" title="Switch between dark and light mode">
+          <span class="theme-icon sun-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </span>
+          <span class="theme-icon moon-icon">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
+          <span class="theme-label" id="theme-label">Light Mode</span>
+        </button>
+        <span class="prototype" id="api-status-badge">
+          <span class="pulse-beacon"></span>
+          CONNECTING TO API…
+        </span>
+        <span class="availability">
+          <i id="status-light"></i>
+          <span id="status-text">Ephemeral Nodes Ready</span>
+        </span>
+      </div>
+    </header>
+    <main id="main"></main>
+    <footer>
+      <div class="footer-left">
+        <span class="footer-tag">CYBER LAB v2.4</span>
+        <span class="footer-sep">·</span>
+        <span>TRAIN. ATTACK. DEFEND</span>
+      </div>
+      <span id="footer-status">Container Orchestration: Ready · Real-time PTY & KasmVNC active</span>
+    </footer>
+  </div>
+
+  <dialog id="launch-dialog">
+    <div class="dialog-chrome">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <form method="dialog"><button class="close" aria-label="Close dialog">×</button></form>
+    </div>
+    <div class="eyebrow">INSTANCE PROVISIONING</div>
+    <h2 id="launch-title">Launch environment</h2>
+    <p class="muted">Select your workstation image. Isolated target networks and flags are auto-configured.</p>
+    <fieldset>
+      <legend>Target Workstation OS</legend>
+      <label class="oschoice">
+        <input type="radio" name="os" value="Kali Linux" checked>
+        <div class="oschoice-content">
+          <span class="osicon kali">K</span>
+          <div>
+            <strong>Kali Linux 2024</strong>
+            <small>Preloaded with nmap, hydra, curl, metasploit</small>
+          </div>
+        </div>
+        <span class="os-selected-badge">PRIMARY</span>
+      </label>
+      <label class="oschoice">
+        <input type="radio" name="os" value="Ubuntu">
+        <div class="oschoice-content">
+          <span class="osicon ubuntu">U</span>
+          <div>
+            <strong>Ubuntu 22.04 LTS</strong>
+            <small>Hardened system environment with auditd & bash</small>
+          </div>
+        </div>
+        <span class="os-selected-badge">SECURE</span>
+      </label>
+    </fieldset>
+    <div class="launchspec">
+      <div class="spec-item">
+        <span class="spec-label">COMPUTE</span>
+        <span class="spec-val">2 vCPU · 4 GB RAM</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">TTL LEASE</span>
+        <span class="spec-val">60 min auto-recycle</span>
+      </div>
+      <div class="spec-item">
+        <span class="spec-label">NETWORKING</span>
+        <span class="spec-val">Dual VLAN Bridge</span>
+      </div>
+    </div>
+    <p class="demohint" id="launch-notice">Ephemeral sandbox: Zero persistence, clean slate on teardown with dynamic flag injection.</p>
+    <button class="primary full" id="confirm-launch">Launch session <span class="btn-arrow">→</span></button>
+  </dialog>
+
+  <dialog id="end-dialog">
+    <div class="dialog-chrome">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+    </div>
+    <div class="eyebrow danger-eyebrow">TEARDOWN PROTOCOL</div>
+    <h2>Terminate active session?</h2>
+    <p class="muted">All ephemeral containers, volatile memory, and network routes will be destroyed.</p>
+
+    <!-- Active Session Progress Summary Card -->
+    <div class="end-progress-summary">
+      <div class="end-summary-header">
+        <div>
+          <strong id="end-dialog-lab-title">Active Lab Mission</strong>
+          <span class="badge-status unlocked" id="end-dialog-os" style="margin-left:8px; font-size:10.5px;">Container</span>
+        </div>
+        <span class="end-summary-tag">ACTIVE RUNTIME</span>
+      </div>
+      <div class="end-summary-stats">
+        <div class="end-stat-pill">
+          <small>OBJECTIVES</small>
+          <strong id="end-dialog-objectives">0 of 3 Mastered</strong>
+        </div>
+        <div class="end-stat-pill">
+          <small>COMMANDS RUN</small>
+          <strong id="end-dialog-cmd-count">0 logged</strong>
+        </div>
+        <div class="end-stat-pill">
+          <small>CAPTURED FLAG</small>
+          <strong id="end-dialog-flag">None yet</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preserve Terminal & Command Progress -->
+    <div class="end-save-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--cyan); letter-spacing:0.06em; text-transform:uppercase;">
+          💾 PRESERVE TERMINAL PROGRESS &amp; COMMANDS
+        </span>
+        <button class="ghost" id="end-copy-buffer" type="button" style="padding:2px 8px; font-size:11px; font-family:var(--font-mono);">
+          📋 Copy buffer
+        </button>
+      </div>
+      <button class="secondary full" id="save-end-transcript" type="button" style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; font-weight:600;">
+        <span>📥</span> Download Terminal Log &amp; Commands (.txt)
+      </button>
+      <label class="end-autosave-label">
+        <input type="checkbox" id="end-autosave-chk" checked>
+        <span>Auto-archive terminal log &amp; commands to local audit trail</span>
+      </label>
+    </div>
+
+    <div class="dialogactions" style="margin-top:18px;">
+      <button class="secondary" id="cancel-end">Keep practicing</button>
+      <button class="secondary" id="save-and-teardown" style="background:rgba(0,240,255,0.15); border-color:rgba(0,240,255,0.4); color:var(--cyan); font-weight:700;">
+        💾 Save &amp; Teardown
+      </button>
+      <button class="danger" id="confirm-end">Destroy &amp; Wipe</button>
+    </div>
+  </dialog>
+  <dialog id="settings-dialog">
+    <div class="dialog-chrome">
+      <div class="window-dots">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+      </div>
+      <form method="dialog"><button class="close" aria-label="Close dialog">×</button></form>
+    </div>
+    <div class="eyebrow">PREFERENCES & TELEMETRY</div>
+    <h2>Workspace Settings</h2>
+    <p class="muted">Customize your analyst profile and terminal environment preferences.</p>
+    
+    <div class="settings-grid">
+      <div class="settings-field">
+        <label for="setting-name">Analyst Name</label>
+        <input id="setting-name" type="text" placeholder="Your name" value="Kartik Baniwal">
+      </div>
+      <div class="settings-field">
+        <label for="setting-role">Role Specialization</label>
+        <select id="setting-role">
+          <option value="Security Analyst">Security Analyst</option>
+          <option value="Penetration Tester">Penetration Tester</option>
+          <option value="SOC Responder">SOC Responder</option>
+          <option value="DevSecOps Engineer">DevSecOps Engineer</option>
+        </select>
+      </div>
+      <div class="settings-field">
+        <label for="setting-fontsize">Terminal Font Size</label>
+        <select id="setting-fontsize">
+          <option value="12px">12px (Compact)</option>
+          <option value="13.5px" selected>13.5px (Standard)</option>
+          <option value="15px">15px (Large)</option>
+        </select>
+      </div>
+      <div class="settings-field">
+        <label for="setting-default-os">Default Lab Image</label>
+        <select id="setting-default-os">
+          <option value="Kali Linux" selected>Kali Linux 2024</option>
+          <option value="Ubuntu">Ubuntu 22.04 LTS</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-auth-box">
+      <div class="auth-box-info">
+        <span class="auth-box-label">ACTIVE OPERATOR SESSION</span>
+        <strong id="settings-operator-name">Kartik Baniwal</strong>
+        <small id="settings-operator-status">Clearance Level 3 · Authenticated</small>
+      </div>
+      <button class="secondary" id="logout-btn"><span>⇥</span> Sign Out</button>
+    </div>
+
+    <div class="dialogactions">
+      <button class="secondary" id="reset-settings">Reset Defaults</button>
+      <button class="primary" id="save-settings">Save Changes</button>
+    </div>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=2.9"></script>
+</body>
+</html>

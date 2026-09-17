@@ -1,0 +1,29 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: session-ingress
+  namespace: range-session-TEMPLATE
+spec:
+  entryPoints:
+    - web
+  routes:
+    # 1. KasmVNC Desktop Stream
+    - match: PathPrefix(`/vnc/TEMPLATE_SESSION_ID/`)
+      kind: Rule
+      services:
+        - name: workstation-service
+          port: 6901
+
+    # 2. code-server In-Browser IDE
+    - match: PathPrefix(`/ide/TEMPLATE_SESSION_ID/`)
+      kind: Rule
+      services:
+        - name: workstation-service
+          port: 8443
+
+    # 3. Target Vulnerable Web Application Port Forward
+    - match: PathPrefix(`/target/TEMPLATE_SESSION_ID:8080/`)
+      kind: Rule
+      services:
+        - name: target
+          port: 8080

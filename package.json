@@ -1,0 +1,24 @@
+{
+  "name": "cyber-lab",
+  "version": "2.9.0",
+  "description": "Cyber Lab — Train. Attack. Defend. Unified Cyber Range Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "npm --prefix backend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "frontend:dev": "npm --prefix frontend run dev",
+    "backend:start": "npm --prefix backend start"
+  },
+  "keywords": [
+    "cyberrange",
+    "k8s",
+    "docker",
+    "kasmvnc",
+    "xterm",
+    "security-labs",
+    "rangeforge"
+  ],
+  "author": "Kartik Baniwal",
+  "license": "MIT"
+}

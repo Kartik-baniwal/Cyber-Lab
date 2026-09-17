@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # Dynamic Ingress Controller & Reverse Proxy
+  traefik:
+    image: traefik:v3.0
+    container_name: cyberrange-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080" # Traefik Dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./traefik/dynamic:/etc/traefik/dynamic:ro"
+    networks:
+      - cyberrange-edge-net
+
+  # Core Cyberrange Control Plane API & WebSocket Gateway
+  cyberrange-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cyberrange-api
+    environment:
+      - PORT=3001
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - ORCHESTRATOR_TYPE=docker
+      - DATABASE_URL=postgresql://cyberrange:secret@postgres:5432/cyberrange_db
+      - REDIS_URL=redis://redis:6379
+      - HMAC_SECRET=production_hmac_cyberrange_secret_key_98234719823
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - cyberrange-edge-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/api`) || PathPrefix(`/`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=3001"
+
+  # Relational Database for Labs, Users, Sessions, and Progress
+  postgres:
+    image: postgres:16-alpine
+    container_name: cyberrange-postgres
+    environment:
+      - POSTGRES_USER=cyberrange
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=cyberrange_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cyberrange-edge-net
+
+  # Redis for Real-time Session State, TTL Expiration, and Rate Limiting
+  redis:
+    image: redis:7-alpine
+    container_name: cyberrange-redis
+    command: redis-server --notify-keyspace-events Ex
+    volumes:
+      - redis_data:/data
+    networks:
+      - cyberrange-edge-net
+
+networks:
+  cyberrange-edge-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

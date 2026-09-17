@@ -1,0 +1,22 @@
+# Dynamic Ingress Rules for Cyberrange Services
+http:
+  routers:
+    # Main Web UI & REST API Router
+    cyberrange-api-router:
+      rule: "PathPrefix(`/api`) || PathPrefix(`/`)"
+      service: cyberrange-api-service
+      entryPoints:
+        - web
+
+    # WebSocket Terminal Router (with WebSocket upgrade headers)
+    terminal-ws-router:
+      rule: "PathPrefix(`/ws/terminal/`)"
+      service: cyberrange-api-service
+      entryPoints:
+        - web
+
+  services:
+    cyberrange-api-service:
+      loadBalancer:
+        servers:
+          - url: "http://cyberrange-api:3001"

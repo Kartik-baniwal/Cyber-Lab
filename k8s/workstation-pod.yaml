@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: workstation
+  namespace: range-session-TEMPLATE
+  labels:
+    app.kubernetes.io/name: cyberrange-workstation
+    session-id: "TEMPLATE_SESSION_ID"
+spec:
+  # Optional: runtimeClassName: gvisor # For kernel-level sandboxing
+  initContainers:
+    - name: inject-flag
+      image: busybox:latest
+      command:
+        - sh
+        - -c
+        - |
+          mkdir -p /shared/lab
+          echo "${DYNAMIC_FLAG}" > /shared/lab/flag.txt
+          chmod 644 /shared/lab/flag.txt
+          cat << 'EOF' > /shared/lab/config.yml
+          lab:
+            name: "TEMPLATE_LAB_NAME"
+            network: isolated
+            session_minutes: 60
+          EOF
+          chmod 644 /shared/lab/config.yml
+      env:
+        - name: DYNAMIC_FLAG
+          value: "RANGE{dynamic_flag_value}"
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /shared/lab
+
+  containers:
+    - name: workstation-desktop
+      image: cyberrange/workstation-kali:latest
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+      ports:
+        - name: kasmvnc
+          containerPort: 6901
+        - name: terminal-pty
+          containerPort: 8081
+        - name: code-server
+          containerPort: 8443
+      env:
+        - name: VNC_PW
+          value: "vncpass123"
+        - name: USER
+          value: "learner"
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /home/learner/lab
+
+  volumes:
+    - name: workspace-volume
+      emptyDir: {}

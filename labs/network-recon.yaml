@@ -1,0 +1,50 @@
+id: recon
+name: Network reconnaissance
+category: NETWORK SECURITY
+level: Beginner
+timeMinutes: 45
+defaultOs: Kali Linux
+osOptions:
+  - Kali Linux
+  - Ubuntu
+
+workstation:
+  image: "cyberrange/workstation-kali:latest"
+  resources:
+    cpu: "2"
+    memory: "4Gi"
+  network:
+    ip: "10.10.0.2"
+    subnet: "10.10.0.0/24"
+  services:
+    kasmvnc: { port: 6901, protocol: "websocket" }
+    terminal: { port: 8081, protocol: "websocket" }
+    codeServer: { port: 8443, protocol: "http" }
+
+targets:
+  - name: "target"
+    ip: "10.10.0.10"
+    image: "cyberrange/target-recon:latest"
+    ports:
+      - 22
+      - 8080
+
+objectives:
+  - id: obj_1
+    title: "Inspect your network address"
+    hint: "Run 'ip addr' to check your local interface (eth0)."
+    verifier:
+      type: "terminal_command"
+      pattern: "^ip\\s+(addr|a)"
+  - id: obj_2
+    title: "Discover target services"
+    hint: "Scan 10.10.0.10 using nmap to find active open ports."
+    verifier:
+      type: "terminal_command"
+      pattern: "^nmap\\s+.*(10\\.10\\.0\\.10|target)"
+  - id: obj_3
+    title: "Capture the service flag"
+    hint: "Retrieve the flag token and submit it below."
+    verifier:
+      type: "dynamic_flag"
+      format: "RANGE{[a-f0-9_]{16}}"
