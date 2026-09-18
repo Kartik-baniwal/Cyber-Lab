@@ -43,7 +43,7 @@ export default function App() {
             <span>A SPACE TO BUILD YOUR CYBER SKILLS</span>
           </div>
           <div className="beacon-metrics">
-            <div className="beacon-metric"><span>KALI ROLLING</span></div>
+            <div className="beacon-metric"><span>KALI ROLLING · UBUNTU 24.04</span></div>
             <div className="beacon-metric"><span>BUILT FOR HANDS-ON LEARNING</span></div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function App() {
             <div className="nav-actions">
 
               <div className="auth-nav-group" id="auth-nav-group">
-                <a href="/RangeForge-Project/" className="nav-btn-login" id="btn-nav-login" title="Operator Log In">
+                <a href="/workspace/" className="nav-btn-login" id="btn-nav-login" title="Operator Log In">
                   Log In
                 </a>
                 <button className="nav-btn-signup" id="btn-nav-signup" title="Create Operator Account">
@@ -92,12 +92,12 @@ export default function App() {
 
 
               <div className="auth-logged-in" id="auth-logged-in" style={{ display: 'none' }}>
-                <a href="/RangeForge-Project/" className="operator-badge-pill" id="operator-badge-pill" style={{ cursor: 'pointer', textDecoration: 'none' }} title="Launch Cyber Lab Dashboard">
+                <a href="/workspace/" className="operator-badge-pill" id="operator-badge-pill" style={{ cursor: 'pointer', textDecoration: 'none' }} title="Launch Cyber Lab Dashboard">
                   <span className="operator-avatar">🛡️</span>
                   <span className="operator-name" id="operator-name-display">Operator</span>
                   <span className="operator-level">L3</span>
                 </a>
-                <a href="/RangeForge-Project/" className="nav-btn-signup" style={{ padding: '7px 14px', fontSize: '12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <a href="/workspace/" className="nav-btn-signup" style={{ padding: '7px 14px', fontSize: '12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                   Open Dashboard ↗
                 </a>
                 <button className="btn-logout-small" id="btn-nav-logout" title="Sign Out">Sign Out</button>
@@ -133,16 +133,16 @@ export default function App() {
                 <div className="hero-copy">
                   <div className="hero-pill-badge"><span className="pulse-dot"></span> THE CYBER LAB, REIMAGINED <span className="hero-badge-arrow">↗</span></div>
                   <h1 className="hero-title">Build skills.<br />Break limits.<br /><span>Stay curious.</span></h1>
-                  <p className="hero-description">Your next breakthrough starts with a command. Explore hands-on security labs, experiment in Kali Linux, and build the confidence to take on real challenges.</p>
+                  <p className="hero-description">Your next breakthrough starts with a command. Explore hands-on security labs, experiment in Kali Linux and Ubuntu, and build the confidence to take on real challenges.</p>
                   <div className="hero-cta-group">
-                    <a href="/RangeForge-Project/" className="btn btn-primary btn-lg">Enter the lab <span aria-hidden="true">↗</span></a>
+                    <a href="/workspace/" className="btn btn-primary btn-lg">Enter the lab <span aria-hidden="true">↗</span></a>
                     <a href="#labs" className="btn btn-secondary btn-lg">Explore challenges <span aria-hidden="true">↓</span></a>
                   </div>
-                  <div className="hero-footnote"><span>Browser workspace</span><i aria-hidden="true"/><span>Real Kali tools</span><i aria-hidden="true"/><span>Learn by doing</span></div>
+                  <div className="hero-footnote"><span>Browser workspace</span><i aria-hidden="true"/><span>Kali &amp; Ubuntu containers</span><i aria-hidden="true"/><span>Learn by doing</span></div>
                 </div>
                 <div className="dimension-scene" aria-label="Animated three-dimensional Cyber Lab security core">
                   <div className="scene-stars" aria-hidden="true"></div>
-                  <div className="scene-coordinate coord-top">CYBER LAB / EXPLORATION CORE <span>01 — 07</span></div>
+                  <div className="scene-coordinate coord-top">CYBER LAB / EXPLORATION CORE <span>01 — 11</span></div>
                   <div className="scene-rotation" aria-hidden="true">
                     <div className="orbital-system">
                       <div className="orbit orbit-a"></div><div className="orbit orbit-b"></div><div className="orbit orbit-c"></div>
@@ -164,8 +164,8 @@ export default function App() {
                 </div>
               </div>
               <div className="hero-stats-row">
-                <div className="hero-stat-card"><div className="hero-stat-val">07<span> practice labs</span></div><div className="hero-stat-label">A new challenge at every level.</div></div>
-                <div className="hero-stat-card"><div className="hero-stat-val">Kali<span> Rolling</span></div><div className="hero-stat-label">The tools you came here to learn.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">11<span> practice labs</span></div><div className="hero-stat-label">A new challenge at every level.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">2<span> Linux environments</span></div><div className="hero-stat-label">Kali Rolling and Ubuntu 24.04 LTS.</div></div>
                 <div className="hero-stat-card"><div className="hero-stat-val">4<span> vCPU per lab</span></div><div className="hero-stat-label">Room to run your experiments.</div></div>
                 <div className="hero-stat-card"><div className="hero-stat-val">Your<span> own pace</span></div><div className="hero-stat-label">Start small. Keep going.</div></div>
               </div>
@@ -186,9 +186,9 @@ export default function App() {
               </div>
 
               <div className="modern-learning-grid">
-                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">⌘</span><span>01 / CHOOSE</span></div><h3>Find your starting point.</h3><p>Get comfortable with Linux, explore network security, or dive into the Kali toolkit. Pick the challenge that meets you where you are.</p><a href="#labs">Explore the collection <span>↗</span></a></article>
+                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">⌘</span><span>01 / CHOOSE</span></div><h3>Find your starting point.</h3><p>Learn Ubuntu fundamentals, explore network security, or dive into the Kali toolkit. Pick the challenge that meets you where you are.</p><a href="#labs">Explore the collection <span>↗</span></a></article>
                 <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">&gt;_</span><span>02 / EXPERIMENT</span></div><h3>Make the terminal yours.</h3><p>Work through clear objectives in your own lab session. Run commands, follow the clues, and see what happens when you try something new.</p><a href="#terminal-demo">Try a practice command <span>↗</span></a></article>
-                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">↗</span><span>03 / GROW</span></div><h3>Turn practice into progress.</h3><p>Capture flags, review your session, and save useful discoveries. Every solved problem is another skill you can build on.</p><a href="/RangeForge-Project/">Open your workspace <span>↗</span></a></article>
+                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">↗</span><span>03 / GROW</span></div><h3>Turn practice into progress.</h3><p>Capture flags, review your session, and save useful discoveries. Every solved problem is another skill you can build on.</p><a href="/workspace/">Open your workspace <span>↗</span></a></article>
               </div>
               <div className="problem-solution-grid" hidden>
 
@@ -290,7 +290,7 @@ export default function App() {
                   </div>
                   <div className="terminal-session-telemetry">
                     <div className="telemetry-item"><span>INTERACTIVE DEMO</span></div>
-                    <a className="terminal-live-link" href="/RangeForge-Project/">Open a real lab ↗</a>
+                    <a className="terminal-live-link" href="/workspace/">Open a real lab ↗</a>
                   </div>
                 </div>
 
@@ -344,15 +344,15 @@ export default function App() {
                 </div>
                 <h2 className="section-title">Find your next challenge.</h2>
                 <p className="section-desc">
-                  From foundational Linux system administration to advanced incident response and offensive Kali operations—each lab is a self-contained, objective-driven sandbox.
+                  Choose from 7 Kali Linux labs and 4 dedicated Ubuntu labs, covering Linux fundamentals, file permissions, log analysis, and security tools.
                 </p>
               </div>
 
 
               <div className="lab-catalog-controls">
                 <div className="lab-domain-filters" id="lab-filters">
-                  <button className="filter-btn active" data-filter="all">All Domains (7)</button>
-                  <button className="filter-btn" data-filter="Linux Essentials">Linux Essentials</button>
+                  <button className="filter-btn active" data-filter="all">All Labs (11)</button>
+                  <button className="filter-btn" data-filter="Kali Linux">Kali Linux labs</button><button className="filter-btn" data-filter="Ubuntu">Ubuntu labs</button><button className="filter-btn" data-filter="Linux Essentials">Linux Essentials</button>
                   <button className="filter-btn" data-filter="Network Security">Network Security</button>
                   <button className="filter-btn" data-filter="Web Security">Web Security</button>
                   <button className="filter-btn" data-filter="Digital Forensics">Digital Forensics</button>
@@ -625,7 +625,7 @@ export default function App() {
                       <span className="arch-node-tag" style={{ color: 'var(--green)', background: 'rgba(52,211,153,0.1)', borderColor: 'rgba(52,211,153,0.3)' }}>ZERO PERSISTENCE</span>
                     </div>
                     <p className="arch-node-desc">
-                      Kali Linux Sandboxes · Ubuntu Hardened Nodes · DVWA Web Targets · Dynamic HMAC Flags Injected at Boot Time
+                      Kali Linux Sandboxes · Ubuntu 24.04 Workstations · DVWA Web Targets · Dynamic HMAC Flags Injected at Boot Time
                     </p>
                   </div>
 
@@ -763,25 +763,25 @@ Generated by Cyber Lab v2.9.0 Audit System · All rights reserved.</pre>
                 <div className="slider-group">
                   <div className="slider-header">
                     <span className="slider-title">Labs Completed</span>
-                    <span className="slider-val" id="val-labs">4 / 7</span>
+                    <span className="slider-val" id="val-labs">4 / 11</span>
                   </div>
-                  <input type="range" className="calc-slider" id="slider-labs" min="0" max="7" value="4" />
+                  <input type="range" className="calc-slider" id="slider-labs" min="0" max="11" value="4" />
                 </div>
 
                 <div className="slider-group">
                   <div className="slider-header">
                     <span className="slider-title">Mission Objectives Solved</span>
-                    <span className="slider-val" id="val-objectives">12 / 21</span>
+                    <span className="slider-val" id="val-objectives">12 / 33</span>
                   </div>
-                  <input type="range" className="calc-slider" id="slider-objectives" min="0" max="21" value="12" />
+                  <input type="range" className="calc-slider" id="slider-objectives" min="0" max="33" value="12" />
                 </div>
 
                 <div className="slider-group">
                   <div className="slider-header">
                     <span className="slider-title">HMAC Flags Captured</span>
-                    <span className="slider-val" id="val-flags">4 / 7</span>
+                    <span className="slider-val" id="val-flags">4 / 11</span>
                   </div>
-                  <input type="range" className="calc-slider" id="slider-flags" min="0" max="7" value="4" />
+                  <input type="range" className="calc-slider" id="slider-flags" min="0" max="11" value="4" />
                 </div>
 
                 <div style={{fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(0,240,255,0.05)', padding: '10px 14px', borderRadius: '6px', border: '1px solid rgba(0,240,255,0.15)'}}>
@@ -1050,7 +1050,7 @@ docker compose up -d
               </div>
             </a>
             <p>
-              Next-generation cybersecurity training platform. Real containers, real PTY terminal streaming, and authentic Kali Linux environment right in your browser.
+              Next-generation cybersecurity training platform. Real containers, real PTY terminal streaming, and dedicated Kali Linux and Ubuntu environments right in your browser.
             </p>
             <div style={{marginTop: '16px', fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--cyan)'}}>
               Created by Kartik Baniwal
@@ -1065,7 +1065,7 @@ docker compose up -d
               <li><a href="#labs" className="footer-link">Web App Security</a></li>
               <li><a href="#labs" className="footer-link">Digital Forensics</a></li>
               <li><a href="#labs" className="footer-link">Contain the Breach</a></li>
-              <li><a href="#labs" className="footer-link">Kali Sandbox</a></li>
+              <li><a href="/workspace/" className="footer-link">Kali Linux labs</a></li><li><a href="/workspace/" className="footer-link">Ubuntu labs</a></li>
             </ul>
           </div>
 

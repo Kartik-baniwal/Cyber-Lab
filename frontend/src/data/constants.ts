@@ -1,136 +1,290 @@
 export const LAB_CATALOG = [
   {
-    id: 'linux',
-    name: 'Linux Fundamentals',
-    category: 'Linux Essentials',
-    level: 'Beginner',
-    time: '30 min',
-    os: 'Ubuntu 22.04',
-    xp: 100,
-    tags: ['CLI Basics', 'Permissions', 'File Nav', 'Process Mgmt'],
-    icon: '🐧',
-    description: 'Master core Linux terminal commands, bash pipeline mechanics, file inspection, and user privilege structures.',
-    objectives: [
-      'Navigate the hierarchical directory structure and inspect hidden files',
-      'Manage user accounts, groups, and standard Unix permissions',
-      'Pipe commands through grep, awk, and sed to parse system logs',
-      'Capture the foundational operator flag'
+    "id": "linux",
+    "name": "Linux fundamentals",
+    "category": "Linux Essentials",
+    "level": "Beginner",
+    "time": "30 min",
+    "os": "Kali Linux",
+    "xp": 100,
+    "tags": [
+      "Linux",
+      "Command line"
     ],
-    tools: ['bash', 'grep', 'find', 'awk', 'chmod', 'ps']
+    "icon": ">_",
+    "description": "Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.",
+    "objectives": [
+      "Find your working directory",
+      "List the lab files",
+      "Capture the hidden flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'recon',
-    name: 'Network Reconnaissance',
-    category: 'Network Security',
-    level: 'Beginner',
-    time: '45 min',
-    os: 'Kali Linux',
-    xp: 150,
-    tags: ['Nmap', 'Port Scanning', 'OSINT', 'Service Detection'],
-    icon: '🔍',
-    description: 'Discover active network hosts, analyze open TCP/UDP ports, enumerate running daemon versions, and map network topologies.',
-    objectives: [
-      'Inspect local interface addresses and gateway routing tables',
-      'Perform SYN stealth and UDP port scans against 10.10.0.10',
-      'Enumerate service versions and banner information on port 80/443',
-      'Locate target secret flag inside /flag.txt'
+    "id": "recon",
+    "name": "Network reconnaissance",
+    "category": "Network Security",
+    "level": "Beginner",
+    "time": "45 min",
+    "os": "Kali Linux",
+    "xp": 100,
+    "tags": [
+      "Networking",
+      "Enumeration"
     ],
-    tools: ['nmap', 'ip addr', 'netstat', 'traceroute', 'ping', 'whois']
+    "icon": "⌘",
+    "description": "Map an isolated network and discover the services running beneath the surface.",
+    "objectives": [
+      "Inspect your network address",
+      "Discover target services",
+      "Capture the service flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'web',
-    name: 'Web Application Security',
-    category: 'Web Security',
-    level: 'Intermediate',
-    time: '60 min',
-    os: 'Kali Linux',
-    xp: 200,
-    tags: ['OWASP Top 10', 'SQLi', 'XSS', 'Directory Fuzzing'],
-    icon: '🌐',
-    description: 'Audit and exploit high-risk vulnerabilities on a dedicated DVWA target sandbox. Extract SQL data and bypass authentication.',
-    objectives: [
-      'Fuzz hidden administrative endpoints with gobuster/dirb',
-      'Bypass authentication forms using SQL injection payloads',
-      'Extract password hashes and decrypt database contents',
-      'Submit the cryptographic session challenge flag'
+    "id": "web",
+    "name": "Web application security",
+    "category": "Web Security",
+    "level": "Intermediate",
+    "time": "60 min",
+    "os": "Kali Linux",
+    "xp": 200,
+    "tags": [
+      "HTTP",
+      "OWASP"
     ],
-    tools: ['gobuster', 'sqlmap', 'nikto', 'curl', 'burp-suite-cli']
+    "icon": "⊞",
+    "description": "Investigate a vulnerable web application and learn to recognize common security flaws.",
+    "objectives": [
+      "Inspect the HTTP response",
+      "Review the application notes",
+      "Capture the application flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'permissions',
-    name: 'Permission Denied: System Hardening',
-    category: 'Linux Essentials',
-    level: 'Intermediate',
-    time: '45 min',
-    os: 'Ubuntu 22.04',
-    xp: 100,
-    tags: ['chmod', 'SUID / SGID', 'POSIX ACLs', 'Sudoers'],
-    icon: '🔒',
-    description: 'Identify misconfigured file permissions, SUID root binaries, insecure sudo privileges, and tighten security barriers.',
-    objectives: [
-      'Find all binaries with SUID permission bits across root filesystem',
-      'Audit /etc/sudoers file for wildcards and NOPASSWD vulnerabilities',
-      'Remediate insecure POSIX permissions across sensitive directories',
-      'Validate system hardening compliance score'
+    "id": "permissions",
+    "name": "Permission denied",
+    "category": "System Hardening",
+    "level": "Intermediate",
+    "time": "45 min",
+    "os": "Kali Linux",
+    "xp": 200,
+    "tags": [
+      "Permissions",
+      "Hardening"
     ],
-    tools: ['chmod', 'chown', 'getfacl', 'setfacl', 'find', 'sudo']
+    "icon": "♧",
+    "description": "Audit file access and fix a misconfiguration before it becomes a security incident.",
+    "objectives": [
+      "Inspect file permissions",
+      "Secure the configuration file",
+      "Capture the hardening flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'forensics',
-    name: 'Follow the Evidence: Digital Forensics',
-    category: 'Digital Forensics',
-    level: 'Intermediate',
-    time: '60 min',
-    os: 'Ubuntu 22.04',
-    xp: 150,
-    tags: ['Memory Dump', 'Log Analysis', 'Strings', 'Binwalk'],
-    icon: '🕵️',
-    description: 'Investigate a simulated breach scenario. Extract hidden payloads from memory dumps, analyze auth logs, and trace attacker pivots.',
-    objectives: [
-      'Analyze /var/log/auth.log to identify failed brute-force origin IPs',
-      'Carve embedded files and strings from captured memory dumps',
-      'Calculate MD5 and SHA-256 integrity hashes for forensic evidence',
-      'Locate attacker artifact flag hidden inside carved image'
+    "id": "forensics",
+    "name": "Follow the evidence",
+    "category": "Digital Forensics",
+    "level": "Intermediate",
+    "time": "60 min",
+    "os": "Kali Linux",
+    "xp": 200,
+    "tags": [
+      "Log analysis",
+      "Investigation"
     ],
-    tools: ['strings', 'binwalk', 'xxd', 'md5sum', 'journalctl', 'grep']
+    "icon": "⌕",
+    "description": "Piece together a timeline from system logs and trace the source of unusual activity.",
+    "objectives": [
+      "Read the system log",
+      "Identify failed sign-ins",
+      "Capture the evidence flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'incident',
-    name: 'Contain the Breach: Incident Response',
-    category: 'Incident Response',
-    level: 'Advanced',
-    time: '90 min',
-    os: 'Kali Linux',
-    xp: 150,
-    tags: ['Malware Triage', 'Process Kill', 'iptables', 'C2 Detection'],
-    icon: '🚨',
-    description: 'Respond to an active ransomware beacon. Triage malicious outbound connections, terminate rogue PIDs, and deploy firewall rules.',
-    objectives: [
-      'Identify rogue background processes transmitting to external C2 IPs',
-      'Kill malicious threads without triggering watchdog self-destruct',
-      'Deploy iptables drop rules to sever egress command channels',
-      'Recover encrypted flag payload and restore service health'
+    "id": "incident",
+    "name": "Contain the breach",
+    "category": "Incident Response",
+    "level": "Advanced",
+    "time": "90 min",
+    "os": "Kali Linux",
+    "xp": 300,
+    "tags": [
+      "Processes",
+      "Blue team"
     ],
-    tools: ['ps aux', 'kill -9', 'iptables', 'ss -tulnp', 'lsof', 'tcpdump']
+    "icon": "ϟ",
+    "description": "Investigate suspicious processes and contain a simulated compromised workstation.",
+    "objectives": [
+      "Inspect running processes",
+      "Stop the suspicious process",
+      "Capture the response flag"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
   },
   {
-    id: 'kali-sandbox',
-    name: 'Kali Linux Full OS & Toolkit',
-    category: 'Offensive Security',
-    level: 'Advanced',
-    time: '120 min',
-    os: 'Kali Linux Rolling',
-    xp: 150,
-    tags: ['Metasploit', 'Hydra', 'Hashcat', 'John The Ripper'],
-    icon: '🐉',
-    description: 'Unrestricted offensive sandbox equipped with over 50+ pre-installed penetration testing utilities and realistic simulated target networks.',
-    objectives: [
-      'Launch automated reconnaissance and service fingerprinting',
-      'Execute dictionary attack against target SSH daemon via Hydra',
-      'Crack captured hashes using John the Ripper / Hashcat',
-      'Simulate full kill-chain exploitation and post-exploitation reporting'
+    "id": "kali-sandbox",
+    "name": "Kali Linux Full OS & Tools",
+    "category": "Offensive Security",
+    "level": "Advanced",
+    "time": "120 min",
+    "os": "Kali Linux",
+    "xp": 300,
+    "tags": [
+      "Kali Linux",
+      "Full OS",
+      "Nmap",
+      "Metasploit",
+      "Tools",
+      "Red Team"
     ],
-    tools: ['metasploit', 'hydra', 'hashcat', 'john', 'aircrack-ng', 'wireshark']
+    "icon": "🐉",
+    "description": "Unrestricted Kali Linux rolling environment with the full offensive security toolkit: Nmap, Metasploit, SQLmap, Hydra, John the Ripper, Wireshark, Gobuster, and root shell. Practice all Kali Linux commands in an isolated sandbox.",
+    "objectives": [
+      "Verify Kali environment & kernel (uname -a & whoami)",
+      "Inspect pre-installed offensive security tools (kali-tools)",
+      "Execute targeted vulnerability scan & extract flag (cat flag.txt)"
+    ],
+    "tools": [
+      "bash",
+      "nmap",
+      "curl"
+    ]
+  },
+  {
+    "id": "ubuntu-fundamentals",
+    "name": "Ubuntu fundamentals",
+    "category": "Linux Essentials",
+    "level": "Beginner",
+    "time": "30 min",
+    "os": "Ubuntu 24.04 LTS",
+    "xp": 100,
+    "tags": [
+      "Ubuntu",
+      "Linux",
+      "Command line"
+    ],
+    "icon": ">_",
+    "description": "Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.",
+    "objectives": [
+      "Find your working directory",
+      "List the lab files",
+      "Capture the hidden flag"
+    ],
+    "tools": [
+      "bash",
+      "python3",
+      "grep",
+      "chmod"
+    ]
+  },
+  {
+    "id": "ubuntu-permissions",
+    "name": "Ubuntu file permissions",
+    "category": "System Hardening",
+    "level": "Intermediate",
+    "time": "45 min",
+    "os": "Ubuntu 24.04 LTS",
+    "xp": 200,
+    "tags": [
+      "Ubuntu",
+      "Permissions",
+      "Hardening"
+    ],
+    "icon": "♧",
+    "description": "Audit file access and fix a misconfiguration before it becomes a security incident.",
+    "objectives": [
+      "Inspect file permissions",
+      "Secure the configuration file",
+      "Capture the hardening flag"
+    ],
+    "tools": [
+      "bash",
+      "python3",
+      "grep",
+      "chmod"
+    ]
+  },
+  {
+    "id": "ubuntu-forensics",
+    "name": "Ubuntu log analysis",
+    "category": "Digital Forensics",
+    "level": "Intermediate",
+    "time": "60 min",
+    "os": "Ubuntu 24.04 LTS",
+    "xp": 200,
+    "tags": [
+      "Ubuntu",
+      "Log analysis",
+      "Investigation"
+    ],
+    "icon": "⌕",
+    "description": "Piece together a timeline from system logs and trace the source of unusual activity.",
+    "objectives": [
+      "Read the system log",
+      "Identify failed sign-ins",
+      "Capture the evidence flag"
+    ],
+    "tools": [
+      "bash",
+      "python3",
+      "grep",
+      "chmod"
+    ]
+  },
+  {
+    "id": "ubuntu-sandbox",
+    "name": "Ubuntu workstation",
+    "category": "Ubuntu Practice",
+    "level": "Beginner",
+    "time": "120 min",
+    "os": "Ubuntu 24.04 LTS",
+    "xp": 100,
+    "tags": [
+      "Ubuntu",
+      "Bash",
+      "Python"
+    ],
+    "icon": ">_",
+    "description": "Explore your own Ubuntu 24.04 container with Bash, Python, editors, and networking utilities.",
+    "objectives": [
+      "Identify Ubuntu",
+      "Check Python",
+      "Capture the workstation flag"
+    ],
+    "tools": [
+      "bash",
+      "python3",
+      "grep",
+      "chmod"
+    ]
   }
 ];
 
@@ -143,7 +297,7 @@ export const PRESENTATION_SLIDES = [
     subtitle: 'TRAIN · ATTACK · DEFEND',
     content: `
       <p style="font-size:16px; color:var(--text-secondary); max-width:680px; text-align:center; line-height:1.6; margin-bottom:28px;">
-        Enterprise-grade cyber range platform delivering realistic, isolated security training environments with live container orchestration, PTY terminal streaming, and an interactive Kali Linux desktop — all in your browser.
+        Enterprise-grade cyber range platform delivering realistic, isolated security training environments with live container orchestration, PTY terminal streaming, and Kali Linux and Ubuntu web workspaces — all in your browser.
       </p>
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
         <div class="stat-pill"><div class="val">7</div><div class="lbl">Labs</div></div>
@@ -205,7 +359,7 @@ export const PRESENTATION_SLIDES = [
         </li>
         <li style="display:flex; gap:14px; align-items:flex-start;">
           <span style="font-size:20px;">🐉</span>
-          <div><strong>Kali Linux XFCE Desktop:</strong> <span style="color:var(--text-secondary);">Draggable windows, taskbar, Chromium, Thunar, Mousepad — fully rendered in browser.</span></div>
+          <div><strong>Kali & Ubuntu Workspaces:</strong> <span style="color:var(--text-secondary);">OS-specific desktop styling, live terminals, and container file listings.</span></div>
         </li>
         <li style="display:flex; gap:14px; align-items:flex-start;">
           <span style="font-size:20px;">🚩</span>
@@ -251,7 +405,7 @@ export const PRESENTATION_SLIDES = [
       <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; max-width:840px;">
         <div class="card"><h4 style="color:var(--cyan); margin-bottom:4px;">⌨️ Terminal</h4><p style="font-size:12px; color:var(--text-secondary);">Real PTY shell via xterm.js v5 with auto-fit and web links.</p></div>
         <div class="card green"><h4 style="color:var(--green); margin-bottom:4px;">🏆 Objectives</h4><p style="font-size:12px; color:var(--text-secondary);">Regex output matching triggers real-time task completion.</p></div>
-        <div class="card purple"><h4 style="color:var(--purple); margin-bottom:4px;">🐉 Desktop</h4><p style="font-size:12px; color:var(--text-secondary);">Simulated Kali XFCE desktop with draggable windows and tools.</p></div>
+        <div class="card purple"><h4 style="color:var(--purple); margin-bottom:4px;">🐉 Desktop</h4><p style="font-size:12px; color:var(--text-secondary);">Kali and Ubuntu web desktops connected to live container terminals.</p></div>
         <div class="card orange"><h4 style="color:var(--orange); margin-bottom:4px;">🚩 HMAC Flags</h4><p style="font-size:12px; color:var(--text-secondary);">HMAC-SHA256 flags injected into container at boot.</p></div>
         <div class="card"><h4 style="color:var(--cyan); margin-bottom:4px;">💾 Audit Trail</h4><p style="font-size:12px; color:var(--text-secondary);">Forensic session transcript download with full command log.</p></div>
         <div class="card green"><h4 style="color:var(--green); margin-bottom:4px;">📊 Analytics</h4><p style="font-size:12px; color:var(--text-secondary);">Readiness score and XP bars across 5 security domains.</p></div>
@@ -261,7 +415,7 @@ export const PRESENTATION_SLIDES = [
   {
     num: '06 / 12',
     eyebrow: 'Lab Catalog',
-    title: '7 Labs Across 5 Domains',
+    title: '11 Labs · Kali Linux & Ubuntu',
     subtitle: 'Curated curriculum from essentials to offensive operations.',
     content: `
       <table style="width:100%; max-width:800px; border-collapse:collapse; font-size:12px; font-family:var(--font-mono);">
@@ -272,13 +426,7 @@ export const PRESENTATION_SLIDES = [
           <th style="padding:6px;">OS</th>
           <th style="padding:6px;">Time</th>
         </tr>
-        <tr><td style="padding:6px;">Linux Fundamentals</td><td>Linux Essentials</td><td><span style="color:var(--green);">Beginner</span></td><td>Ubuntu</td><td>30m</td></tr>
-        <tr><td style="padding:6px;">Network Reconnaissance</td><td>Network Security</td><td><span style="color:var(--green);">Beginner</span></td><td>Kali</td><td>45m</td></tr>
-        <tr><td style="padding:6px;">Web App Security</td><td>Web Security</td><td><span style="color:var(--orange);">Intermediate</span></td><td>Kali</td><td>60m</td></tr>
-        <tr><td style="padding:6px;">Permission Denied</td><td>System Hardening</td><td><span style="color:var(--orange);">Intermediate</span></td><td>Ubuntu</td><td>45m</td></tr>
-        <tr><td style="padding:6px;">Follow the Evidence</td><td>Digital Forensics</td><td><span style="color:var(--orange);">Intermediate</span></td><td>Ubuntu</td><td>60m</td></tr>
-        <tr><td style="padding:6px;">Contain the Breach</td><td>Incident Response</td><td><span style="color:var(--red);">Advanced</span></td><td>Kali</td><td>90m</td></tr>
-        <tr><td style="padding:6px;">Kali Full OS & Tools</td><td>Offensive Security</td><td><span style="color:var(--red);">Advanced</span></td><td>Kali</td><td>120m</td></tr>
+        ${LAB_CATALOG.map(lab => `<tr><td style="padding:6px;">${lab.name}</td><td>${lab.category}</td><td>${lab.level}</td><td>${lab.os}</td><td>${lab.time}</td></tr>`).join('')}
       </table>
     `
   },
@@ -479,15 +627,7 @@ export const API_RESPONSES = {
     clusterVersion: '2.9.0',
     memoryUsageMB: 142.6
   },
-  'labs': [
-    { id: 'linux', name: 'Linux Fundamentals', os: 'Ubuntu 22.04', difficulty: 'Beginner', duration: '30m' },
-    { id: 'recon', name: 'Network Reconnaissance', os: 'Kali Linux', difficulty: 'Beginner', duration: '45m' },
-    { id: 'web', name: 'Web Application Security', os: 'Kali Linux', difficulty: 'Intermediate', duration: '60m' },
-    { id: 'permissions', name: 'Permission Denied', os: 'Ubuntu 22.04', difficulty: 'Intermediate', duration: '45m' },
-    { id: 'forensics', name: 'Follow the Evidence', os: 'Ubuntu 22.04', difficulty: 'Intermediate', duration: '60m' },
-    { id: 'incident', name: 'Contain the Breach', os: 'Kali Linux', difficulty: 'Advanced', duration: '90m' },
-    { id: 'kali-sandbox', name: 'Kali Linux Full OS & Tools', os: 'Kali Linux', difficulty: 'Advanced', duration: '120m' }
-  ],
+  'labs': LAB_CATALOG.map(lab => ({ id: lab.id, name: lab.name, os: lab.os, difficulty: lab.level, duration: lab.time })),
   'session': {
     id: 'rf-9f82d1c0-44a2-4a0b-8d19-ee1239',
     labId: 'recon',

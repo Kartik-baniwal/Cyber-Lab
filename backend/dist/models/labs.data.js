@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LAB_CATALOG = void 0;
-exports.LAB_CATALOG = [
+const KALI_LABS = [
     {
         id: 'linux',
         name: 'Linux fundamentals',
@@ -12,11 +12,11 @@ exports.LAB_CATALOG = [
         color: '',
         desc: 'Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.',
         tags: ['Linux', 'Command line'],
-        os: 'Ubuntu',
+        os: 'Kali Linux',
         tasks: ['Find your working directory', 'List the lab files', 'Capture the hidden flag'],
         commands: ['pwd', 'ls -la', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{first_steps}',
-        workstationImage: 'cyberrange/workstation-ubuntu:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         objectives: [
             { id: 'linux_1', title: 'Find your working directory', command: 'pwd', hint: 'Type pwd in the terminal.' },
             { id: 'linux_2', title: 'List the lab files', command: 'ls -la', hint: 'Type ls -la to see all files including hidden files.' },
@@ -37,7 +37,7 @@ exports.LAB_CATALOG = [
         tasks: ['Inspect your network address', 'Discover target services', 'Capture the service flag'],
         commands: ['ip addr', 'nmap target', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{map_the_network}',
-        workstationImage: 'cyberrange/workstation-kali:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         targetImage: 'cyberrange/target-recon:latest',
         targetPorts: [22, 8080],
         objectives: [
@@ -60,7 +60,7 @@ exports.LAB_CATALOG = [
         tasks: ['Inspect the HTTP response', 'Review the application notes', 'Capture the application flag'],
         commands: ['curl target:8080', 'cat notes.txt', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{web_detective}',
-        workstationImage: 'cyberrange/workstation-kali:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         targetImage: 'cyberrange/target-vulnerable-web:latest',
         targetPorts: [8080],
         objectives: [
@@ -79,11 +79,11 @@ exports.LAB_CATALOG = [
         color: 'purple',
         desc: 'Audit file access and fix a misconfiguration before it becomes a security incident.',
         tags: ['Permissions', 'Hardening'],
-        os: 'Ubuntu',
+        os: 'Kali Linux',
         tasks: ['Inspect file permissions', 'Secure the configuration file', 'Capture the hardening flag'],
         commands: ['ls -la', 'chmod 600 config.yml', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{least_privilege}',
-        workstationImage: 'cyberrange/workstation-ubuntu:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         objectives: [
             { id: 'perm_1', title: 'Inspect file permissions', command: 'ls -la', hint: 'Check the permissions of config.yml with ls -la.' },
             { id: 'perm_2', title: 'Secure the configuration file', command: 'chmod 600 config.yml', hint: 'Restrict config.yml to read/write by owner using chmod 600 config.yml.' },
@@ -100,11 +100,11 @@ exports.LAB_CATALOG = [
         color: 'blue',
         desc: 'Piece together a timeline from system logs and trace the source of unusual activity.',
         tags: ['Log analysis', 'Investigation'],
-        os: 'Ubuntu',
+        os: 'Kali Linux',
         tasks: ['Read the system log', 'Identify failed sign-ins', 'Capture the evidence flag'],
         commands: ['cat auth.log', 'grep failed auth.log', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{follow_the_evidence}',
-        workstationImage: 'cyberrange/workstation-ubuntu:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         objectives: [
             { id: 'foren_1', title: 'Read the system log', command: 'cat auth.log', hint: 'Display auth.log to inspect authentication entries.' },
             { id: 'foren_2', title: 'Identify failed sign-ins', command: 'grep failed auth.log', hint: 'Filter for unauthorized access attempts with grep failed auth.log.' },
@@ -125,7 +125,7 @@ exports.LAB_CATALOG = [
         tasks: ['Inspect running processes', 'Stop the suspicious process', 'Capture the response flag'],
         commands: ['ps aux', 'kill 4242', 'cat flag.txt'],
         defaultFlagPattern: 'RANGE{incident_contained}',
-        workstationImage: 'cyberrange/workstation-kali:latest',
+        workstationImage: 'rangeforge/kali-custom:latest',
         objectives: [
             { id: 'inc_1', title: 'Inspect running processes', command: 'ps aux', hint: 'Find the suspicious process with ps aux.' },
             { id: 'inc_2', title: 'Stop the suspicious process', command: 'kill 4242', hint: 'Terminate the rogue process PID using kill 4242.' },
@@ -160,3 +160,36 @@ exports.LAB_CATALOG = [
         ]
     }
 ];
+// Separate identities keep Ubuntu progress and flags independent of Kali labs.
+const ubuntuTemplates = [
+    { source: 'linux', id: 'ubuntu-fundamentals', name: 'Ubuntu fundamentals' },
+    { source: 'permissions', id: 'ubuntu-permissions', name: 'Ubuntu file permissions' },
+    { source: 'forensics', id: 'ubuntu-forensics', name: 'Ubuntu log analysis' }
+];
+const UBUNTU_LABS = ubuntuTemplates.map(({ source, id, name }) => {
+    const template = KALI_LABS.find(lab => lab.id === source);
+    return {
+        ...template, id, name, os: 'Ubuntu',
+        workstationImage: 'cyberrange/workstation-ubuntu:latest',
+        tags: ['Ubuntu', ...template.tags],
+        defaultFlagPattern: `RANGE{${id.replace(/-/g, '_')}}`,
+        tasks: [...template.tasks], commands: [...template.commands],
+        objectives: template.objectives.map((objective, index) => ({ ...objective, id: `${id}_${index + 1}` }))
+    };
+});
+UBUNTU_LABS.push({
+    id: 'ubuntu-sandbox', name: 'Ubuntu workstation', category: 'UBUNTU PRACTICE',
+    level: 'Beginner', time: 120, icon: '>_', color: 'orange',
+    desc: 'Explore your own Ubuntu 24.04 container with Bash, Python, editors, and networking utilities.',
+    tags: ['Ubuntu', 'Bash', 'Python'], os: 'Ubuntu',
+    workstationImage: 'cyberrange/workstation-ubuntu:latest',
+    defaultFlagPattern: 'RANGE{ubuntu_workstation}',
+    tasks: ['Identify Ubuntu', 'Check Python', 'Capture the workstation flag'],
+    commands: ['cat /etc/os-release', 'python3 --version', 'cat flag.txt'],
+    objectives: [
+        { id: 'ubuntu_sandbox_1', title: 'Identify Ubuntu', command: 'cat /etc/os-release', hint: 'Read /etc/os-release to identify your OS.' },
+        { id: 'ubuntu_sandbox_2', title: 'Check Python', command: 'python3 --version', hint: 'Print the installed Python version.' },
+        { id: 'ubuntu_sandbox_3', title: 'Capture the workstation flag', command: 'cat flag.txt', hint: 'Read flag.txt and submit its contents.', isFlagObjective: true }
+    ]
+});
+exports.LAB_CATALOG = [...KALI_LABS, ...UBUNTU_LABS];

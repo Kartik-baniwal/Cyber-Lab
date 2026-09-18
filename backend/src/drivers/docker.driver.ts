@@ -3,6 +3,7 @@ import { LabSession, ProvisionedEnvironment, CommandResult } from '../models/typ
 import { WebSocket } from 'ws';
 import { execFile, spawn } from 'child_process';
 import util from 'util';
+import { restrictsPwd, LINUX_SHELL_POLICY } from '../services/command-policy';
 
 const execFileAsync = util.promisify(execFile);
 const DOCKER_BIN = process.env.DOCKER_BIN || (process.platform === 'darwin' ? '/usr/local/bin/docker' : 'docker');
@@ -43,18 +44,23 @@ export class DockerDriver implements IOrchestratorDriver {
       await execFileAsync(DOCKER_BIN, ['rm', '-f', wsContainerName]);
     } catch {}
 
-    const chosenImage = process.env.KALI_IMAGE || 'rangeforge/kali-custom:latest';
+    const isUbuntu = session.os === 'Ubuntu';
+    const chosenImage = isUbuntu
+      ? (process.env.UBUNTU_IMAGE || 'cyberrange/workstation-ubuntu:latest')
+      : (process.env.KALI_IMAGE || 'rangeforge/kali-custom:latest');
     try {
       await execFileAsync(DOCKER_BIN, ['image', 'inspect', chosenImage]);
     } catch {
-      throw new Error(`Full Kali image ${chosenImage} is missing. Run bash scripts/build-kali-image.sh first.`);
+      const imageName = isUbuntu ? 'Ubuntu' : 'Full Kali';
+      const buildScript = isUbuntu ? 'build-ubuntu-image.sh' : 'build-kali-image.sh';
+      throw new Error(`${imageName} image ${chosenImage} is missing. Run bash scripts/${buildScript} first.`);
     }
 
     await execFileAsync(DOCKER_BIN, [
       'run',
       '-d',
       '--name', wsContainerName,
-      '--hostname', 'kali',
+      '--hostname', isUbuntu ? 'ubuntu' : 'kali',
       '--cpus', '4',
       '--memory', '3584m',
       '--memory-swap', '3584m',
@@ -106,7 +112,7 @@ export class DockerDriver implements IOrchestratorDriver {
       return { stdout: '', exitCode: 0 };
     }
 
-    const cleanCmd = cmd;
+    const cleanCmd = restrictsPwd(session) ? `${LINUX_SHELL_POLICY}\n${cmd}` : cmd;
 
     const wsContainerName = await this.ensureContainerRunning(session);
     console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cleanCmd}`);
@@ -134,11 +140,21 @@ export class DockerDriver implements IOrchestratorDriver {
 
   async attachTerminal(session: LabSession, ws: WebSocket): Promise<void> {
     const wsContainerName = await this.ensureContainerRunning(session);
-    ws.send('\r\nConnected to real Kali Rolling. This container shares the Docker host kernel.\r\n');
+    let shellCommand = '/bin/bash -il';
+    if (restrictsPwd(session)) {
+      // Install on every attachment so existing containers receive the policy
+      // when the learner reconnects. Bash handles editing/history/paste itself.
+      const rc = '[ -f /etc/profile ] && . /etc/profile\n[ -f ~/.bashrc ] && . ~/.bashrc\n' + LINUX_SHELL_POLICY;
+      await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c',
+        'printf "%s\\n" "$1" > /tmp/cyberlab-linux.bashrc', '--', rc]);
+      shellCommand = '/bin/bash --rcfile /tmp/cyberlab-linux.bashrc -i';
+    }
+    const osName = session.os === 'Ubuntu' ? 'Ubuntu' : 'Kali Rolling';
+    ws.send(`\r\nConnected to real ${osName}. This container shares the Docker host kernel.\r\n`);
     // script allocates a real Linux PTY, preserving shell state, Ctrl-C, and interactive tools.
     const terminal = spawn(DOCKER_BIN, [
       'exec', '-i', '-e', 'TERM=xterm-256color', wsContainerName,
-      'script', '-qefc', '/bin/bash -il', '/dev/null'
+      'script', '-qefc', shellCommand, '/dev/null'
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
     const send = (data: Buffer) => {
       if (ws.readyState === WebSocket.OPEN) ws.send(data.toString());

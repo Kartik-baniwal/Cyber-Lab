@@ -4,15 +4,571 @@ const API_BASE = (window.location.protocol === 'file:' || window.location.port =
   : '';
 let isLiveApi = false;
 let labs = [
-  { id: 'linux', name: 'Linux fundamentals', category: 'LINUX ESSENTIALS', level: 'Beginner', time: 30, icon: '>_', color: '', desc: 'Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.', tags: ['Linux', 'Command line'], os: 'Ubuntu', tasks: ['Find your working directory', 'List the lab files', 'Capture the hidden flag'], commands: ['pwd', 'ls -la', 'cat flag.txt'], flag: 'RANGE{first_steps}' },
-  { id: 'recon', name: 'Network reconnaissance', category: 'NETWORK SECURITY', level: 'Beginner', time: 45, icon: '⌘', color: 'blue', desc: 'Map an isolated network and discover the services running beneath the surface.', tags: ['Networking', 'Enumeration'], os: 'Kali Linux', tasks: ['Inspect your network address', 'Discover target services', 'Capture the service flag'], commands: ['ip addr', 'nmap target', 'cat flag.txt'], flag: 'RANGE{map_the_network}' },
-  { id: 'web', name: 'Web application security', category: 'WEB SECURITY', level: 'Intermediate', time: 60, icon: '⊞', color: 'orange', desc: 'Investigate a vulnerable web application and learn to recognize common security flaws.', tags: ['HTTP', 'OWASP'], os: 'Kali Linux', tasks: ['Inspect the HTTP response', 'Review the application notes', 'Capture the application flag'], commands: ['curl target:8080', 'cat notes.txt', 'cat flag.txt'], flag: 'RANGE{web_detective}' },
-  { id: 'permissions', name: 'Permission denied', category: 'SYSTEM HARDENING', level: 'Intermediate', time: 45, icon: '♧', color: 'purple', desc: 'Audit file access and fix a misconfiguration before it becomes a security incident.', tags: ['Permissions', 'Hardening'], os: 'Ubuntu', tasks: ['Inspect file permissions', 'Secure the configuration file', 'Capture the hardening flag'], commands: ['ls -la', 'chmod 600 config.yml', 'cat flag.txt'], flag: 'RANGE{least_privilege}' },
-  { id: 'forensics', name: 'Follow the evidence', category: 'DIGITAL FORENSICS', level: 'Intermediate', time: 60, icon: '⌕', color: 'blue', desc: 'Piece together a timeline from system logs and trace the source of unusual activity.', tags: ['Log analysis', 'Investigation'], os: 'Ubuntu', tasks: ['Read the system log', 'Identify failed sign-ins', 'Capture the evidence flag'], commands: ['cat auth.log', 'grep failed auth.log', 'cat flag.txt'], flag: 'RANGE{follow_the_evidence}' },
-  { id: 'incident', name: 'Contain the breach', category: 'INCIDENT RESPONSE', level: 'Advanced', time: 90, icon: 'ϟ', color: 'orange', desc: 'Investigate suspicious processes and contain a simulated compromised workstation.', tags: ['Processes', 'Blue team'], os: 'Kali Linux', tasks: ['Inspect running processes', 'Stop the suspicious process', 'Capture the response flag'], commands: ['ps aux', 'kill 4242', 'cat flag.txt'], flag: 'RANGE{incident_contained}' },
-  { id: 'kali-sandbox', name: 'Kali Linux Full OS & Tools', category: 'OFFENSIVE SECURITY', level: 'Advanced', time: 120, icon: '🐉', color: 'blue', desc: 'Unrestricted Kali Linux rolling environment with the full offensive security toolkit: Nmap, Metasploit, SQLmap, Hydra, John the Ripper, Wireshark, Gobuster, and root shell. Practice all Kali Linux commands in an isolated sandbox.', tags: ['Kali Linux', 'Full OS', 'Nmap', 'Metasploit', 'Tools', 'Red Team'], os: 'Kali Linux', tasks: ['Verify Kali environment & kernel (uname -a & whoami)', 'Inspect pre-installed offensive security tools (kali-tools)', 'Execute targeted vulnerability scan & extract flag (cat flag.txt)'], commands: ['uname -a', 'kali-tools', 'cat flag.txt'], flag: 'RANGE{kali_full_os_mastery_2026}' }
+  {
+    "id": "linux",
+    "name": "Linux fundamentals",
+    "category": "LINUX ESSENTIALS",
+    "level": "Beginner",
+    "time": 30,
+    "icon": ">_",
+    "color": "",
+    "desc": "Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.",
+    "tags": [
+      "Linux",
+      "Command line"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Find your working directory",
+      "List the lab files",
+      "Capture the hidden flag"
+    ],
+    "commands": [
+      "pwd",
+      "ls -la",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{first_steps}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "objectives": [
+      {
+        "id": "linux_1",
+        "title": "Find your working directory",
+        "command": "pwd",
+        "hint": "Type pwd in the terminal."
+      },
+      {
+        "id": "linux_2",
+        "title": "List the lab files",
+        "command": "ls -la",
+        "hint": "Type ls -la to see all files including hidden files."
+      },
+      {
+        "id": "linux_3",
+        "title": "Capture the hidden flag",
+        "command": "cat flag.txt",
+        "hint": "Read flag.txt and submit the contents.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{first_steps}"
+  },
+  {
+    "id": "recon",
+    "name": "Network reconnaissance",
+    "category": "NETWORK SECURITY",
+    "level": "Beginner",
+    "time": 45,
+    "icon": "⌘",
+    "color": "blue",
+    "desc": "Map an isolated network and discover the services running beneath the surface.",
+    "tags": [
+      "Networking",
+      "Enumeration"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Inspect your network address",
+      "Discover target services",
+      "Capture the service flag"
+    ],
+    "commands": [
+      "ip addr",
+      "nmap target",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{map_the_network}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "targetImage": "cyberrange/target-recon:latest",
+    "targetPorts": [
+      22,
+      8080
+    ],
+    "objectives": [
+      {
+        "id": "recon_1",
+        "title": "Inspect your network address",
+        "command": "ip addr",
+        "hint": "Run ip addr or ip a to view your assigned IP."
+      },
+      {
+        "id": "recon_2",
+        "title": "Discover target services",
+        "command": "nmap target",
+        "hint": "Scan the lab target using nmap target or nmap 10.10.0.10."
+      },
+      {
+        "id": "recon_3",
+        "title": "Capture the service flag",
+        "command": "cat flag.txt",
+        "hint": "Inspect the discovered services to retrieve the flag.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{map_the_network}"
+  },
+  {
+    "id": "web",
+    "name": "Web application security",
+    "category": "WEB SECURITY",
+    "level": "Intermediate",
+    "time": 60,
+    "icon": "⊞",
+    "color": "orange",
+    "desc": "Investigate a vulnerable web application and learn to recognize common security flaws.",
+    "tags": [
+      "HTTP",
+      "OWASP"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Inspect the HTTP response",
+      "Review the application notes",
+      "Capture the application flag"
+    ],
+    "commands": [
+      "curl target:8080",
+      "cat notes.txt",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{web_detective}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "targetImage": "cyberrange/target-vulnerable-web:latest",
+    "targetPorts": [
+      8080
+    ],
+    "objectives": [
+      {
+        "id": "web_1",
+        "title": "Inspect the HTTP response",
+        "command": "curl target:8080",
+        "hint": "Use curl target:8080 to fetch the homepage headers and HTML."
+      },
+      {
+        "id": "web_2",
+        "title": "Review the application notes",
+        "command": "cat notes.txt",
+        "hint": "Read notes.txt to review developer comments and vulnerabilities."
+      },
+      {
+        "id": "web_3",
+        "title": "Capture the application flag",
+        "command": "cat flag.txt",
+        "hint": "Extract the token from the web vulnerability and verify the flag.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{web_detective}"
+  },
+  {
+    "id": "permissions",
+    "name": "Permission denied",
+    "category": "SYSTEM HARDENING",
+    "level": "Intermediate",
+    "time": 45,
+    "icon": "♧",
+    "color": "purple",
+    "desc": "Audit file access and fix a misconfiguration before it becomes a security incident.",
+    "tags": [
+      "Permissions",
+      "Hardening"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Inspect file permissions",
+      "Secure the configuration file",
+      "Capture the hardening flag"
+    ],
+    "commands": [
+      "ls -la",
+      "chmod 600 config.yml",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{least_privilege}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "objectives": [
+      {
+        "id": "perm_1",
+        "title": "Inspect file permissions",
+        "command": "ls -la",
+        "hint": "Check the permissions of config.yml with ls -la."
+      },
+      {
+        "id": "perm_2",
+        "title": "Secure the configuration file",
+        "command": "chmod 600 config.yml",
+        "hint": "Restrict config.yml to read/write by owner using chmod 600 config.yml."
+      },
+      {
+        "id": "perm_3",
+        "title": "Capture the hardening flag",
+        "command": "cat flag.txt",
+        "hint": "View flag.txt after successfully hardening the permissions.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{least_privilege}"
+  },
+  {
+    "id": "forensics",
+    "name": "Follow the evidence",
+    "category": "DIGITAL FORENSICS",
+    "level": "Intermediate",
+    "time": 60,
+    "icon": "⌕",
+    "color": "blue",
+    "desc": "Piece together a timeline from system logs and trace the source of unusual activity.",
+    "tags": [
+      "Log analysis",
+      "Investigation"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Read the system log",
+      "Identify failed sign-ins",
+      "Capture the evidence flag"
+    ],
+    "commands": [
+      "cat auth.log",
+      "grep failed auth.log",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{follow_the_evidence}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "objectives": [
+      {
+        "id": "foren_1",
+        "title": "Read the system log",
+        "command": "cat auth.log",
+        "hint": "Display auth.log to inspect authentication entries."
+      },
+      {
+        "id": "foren_2",
+        "title": "Identify failed sign-ins",
+        "command": "grep failed auth.log",
+        "hint": "Filter for unauthorized access attempts with grep failed auth.log."
+      },
+      {
+        "id": "foren_3",
+        "title": "Capture the evidence flag",
+        "command": "cat flag.txt",
+        "hint": "Trace the compromised account to verify the forensic flag.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{follow_the_evidence}"
+  },
+  {
+    "id": "incident",
+    "name": "Contain the breach",
+    "category": "INCIDENT RESPONSE",
+    "level": "Advanced",
+    "time": 90,
+    "icon": "ϟ",
+    "color": "orange",
+    "desc": "Investigate suspicious processes and contain a simulated compromised workstation.",
+    "tags": [
+      "Processes",
+      "Blue team"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Inspect running processes",
+      "Stop the suspicious process",
+      "Capture the response flag"
+    ],
+    "commands": [
+      "ps aux",
+      "kill 4242",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{incident_contained}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "objectives": [
+      {
+        "id": "inc_1",
+        "title": "Inspect running processes",
+        "command": "ps aux",
+        "hint": "Find the suspicious process with ps aux."
+      },
+      {
+        "id": "inc_2",
+        "title": "Stop the suspicious process",
+        "command": "kill 4242",
+        "hint": "Terminate the rogue process PID using kill 4242."
+      },
+      {
+        "id": "inc_3",
+        "title": "Capture the response flag",
+        "command": "cat flag.txt",
+        "hint": "Validate that the incident has been successfully contained.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{incident_contained}"
+  },
+  {
+    "id": "kali-sandbox",
+    "name": "Kali Linux Full OS & Tools",
+    "category": "OFFENSIVE SECURITY",
+    "level": "Advanced",
+    "time": 120,
+    "icon": "🐉",
+    "color": "blue",
+    "desc": "Unrestricted Kali Linux rolling environment with the full offensive security toolkit: Nmap, Metasploit, SQLmap, Hydra, John the Ripper, Wireshark, Gobuster, and root shell. Practice all Kali Linux commands in an isolated sandbox.",
+    "tags": [
+      "Kali Linux",
+      "Full OS",
+      "Nmap",
+      "Metasploit",
+      "Tools",
+      "Red Team"
+    ],
+    "os": "Kali Linux",
+    "tasks": [
+      "Verify Kali environment & kernel (uname -a & whoami)",
+      "Inspect pre-installed offensive security tools (kali-tools)",
+      "Execute targeted vulnerability scan & extract flag (cat flag.txt)"
+    ],
+    "commands": [
+      "uname -a",
+      "kali-tools",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{kali_full_os_mastery_2026}",
+    "workstationImage": "rangeforge/kali-custom:latest",
+    "targetImage": "cyberrange/target-recon:latest",
+    "targetPorts": [
+      22,
+      80,
+      8080
+    ],
+    "objectives": [
+      {
+        "id": "kali_1",
+        "title": "Verify Kali environment & kernel",
+        "command": "uname -a",
+        "hint": "Run uname -a or whoami to inspect system kernel & privileges."
+      },
+      {
+        "id": "kali_2",
+        "title": "Inspect pre-installed offensive security tools",
+        "command": "kali-tools",
+        "hint": "Run kali-tools or which nmap msfconsole to see available utilities."
+      },
+      {
+        "id": "kali_3",
+        "title": "Execute targeted vulnerability scan & extract flag",
+        "command": "cat flag.txt",
+        "hint": "Run nmap target and cat flag.txt to verify root flag.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{kali_full_os_mastery_2026}"
+  },
+  {
+    "id": "ubuntu-fundamentals",
+    "name": "Ubuntu fundamentals",
+    "category": "LINUX ESSENTIALS",
+    "level": "Beginner",
+    "time": 30,
+    "icon": ">_",
+    "color": "",
+    "desc": "Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.",
+    "tags": [
+      "Ubuntu",
+      "Linux",
+      "Command line"
+    ],
+    "os": "Ubuntu",
+    "tasks": [
+      "Find your working directory",
+      "List the lab files",
+      "Capture the hidden flag"
+    ],
+    "commands": [
+      "pwd",
+      "ls -la",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{ubuntu_fundamentals}",
+    "workstationImage": "cyberrange/workstation-ubuntu:latest",
+    "objectives": [
+      {
+        "id": "ubuntu-fundamentals_1",
+        "title": "Find your working directory",
+        "command": "pwd",
+        "hint": "Type pwd in the terminal."
+      },
+      {
+        "id": "ubuntu-fundamentals_2",
+        "title": "List the lab files",
+        "command": "ls -la",
+        "hint": "Type ls -la to see all files including hidden files."
+      },
+      {
+        "id": "ubuntu-fundamentals_3",
+        "title": "Capture the hidden flag",
+        "command": "cat flag.txt",
+        "hint": "Read flag.txt and submit the contents.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{ubuntu_fundamentals}"
+  },
+  {
+    "id": "ubuntu-permissions",
+    "name": "Ubuntu file permissions",
+    "category": "SYSTEM HARDENING",
+    "level": "Intermediate",
+    "time": 45,
+    "icon": "♧",
+    "color": "purple",
+    "desc": "Audit file access and fix a misconfiguration before it becomes a security incident.",
+    "tags": [
+      "Ubuntu",
+      "Permissions",
+      "Hardening"
+    ],
+    "os": "Ubuntu",
+    "tasks": [
+      "Inspect file permissions",
+      "Secure the configuration file",
+      "Capture the hardening flag"
+    ],
+    "commands": [
+      "ls -la",
+      "chmod 600 config.yml",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{ubuntu_permissions}",
+    "workstationImage": "cyberrange/workstation-ubuntu:latest",
+    "objectives": [
+      {
+        "id": "ubuntu-permissions_1",
+        "title": "Inspect file permissions",
+        "command": "ls -la",
+        "hint": "Check the permissions of config.yml with ls -la."
+      },
+      {
+        "id": "ubuntu-permissions_2",
+        "title": "Secure the configuration file",
+        "command": "chmod 600 config.yml",
+        "hint": "Restrict config.yml to read/write by owner using chmod 600 config.yml."
+      },
+      {
+        "id": "ubuntu-permissions_3",
+        "title": "Capture the hardening flag",
+        "command": "cat flag.txt",
+        "hint": "View flag.txt after successfully hardening the permissions.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{ubuntu_permissions}"
+  },
+  {
+    "id": "ubuntu-forensics",
+    "name": "Ubuntu log analysis",
+    "category": "DIGITAL FORENSICS",
+    "level": "Intermediate",
+    "time": 60,
+    "icon": "⌕",
+    "color": "blue",
+    "desc": "Piece together a timeline from system logs and trace the source of unusual activity.",
+    "tags": [
+      "Ubuntu",
+      "Log analysis",
+      "Investigation"
+    ],
+    "os": "Ubuntu",
+    "tasks": [
+      "Read the system log",
+      "Identify failed sign-ins",
+      "Capture the evidence flag"
+    ],
+    "commands": [
+      "cat auth.log",
+      "grep failed auth.log",
+      "cat flag.txt"
+    ],
+    "defaultFlagPattern": "RANGE{ubuntu_forensics}",
+    "workstationImage": "cyberrange/workstation-ubuntu:latest",
+    "objectives": [
+      {
+        "id": "ubuntu-forensics_1",
+        "title": "Read the system log",
+        "command": "cat auth.log",
+        "hint": "Display auth.log to inspect authentication entries."
+      },
+      {
+        "id": "ubuntu-forensics_2",
+        "title": "Identify failed sign-ins",
+        "command": "grep failed auth.log",
+        "hint": "Filter for unauthorized access attempts with grep failed auth.log."
+      },
+      {
+        "id": "ubuntu-forensics_3",
+        "title": "Capture the evidence flag",
+        "command": "cat flag.txt",
+        "hint": "Trace the compromised account to verify the forensic flag.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{ubuntu_forensics}"
+  },
+  {
+    "id": "ubuntu-sandbox",
+    "name": "Ubuntu workstation",
+    "category": "UBUNTU PRACTICE",
+    "level": "Beginner",
+    "time": 120,
+    "icon": ">_",
+    "color": "orange",
+    "desc": "Explore your own Ubuntu 24.04 container with Bash, Python, editors, and networking utilities.",
+    "tags": [
+      "Ubuntu",
+      "Bash",
+      "Python"
+    ],
+    "os": "Ubuntu",
+    "workstationImage": "cyberrange/workstation-ubuntu:latest",
+    "defaultFlagPattern": "RANGE{ubuntu_workstation}",
+    "tasks": [
+      "Identify Ubuntu",
+      "Check Python",
+      "Capture the workstation flag"
+    ],
+    "commands": [
+      "cat /etc/os-release",
+      "python3 --version",
+      "cat flag.txt"
+    ],
+    "objectives": [
+      {
+        "id": "ubuntu_sandbox_1",
+        "title": "Identify Ubuntu",
+        "command": "cat /etc/os-release",
+        "hint": "Read /etc/os-release to identify your OS."
+      },
+      {
+        "id": "ubuntu_sandbox_2",
+        "title": "Check Python",
+        "command": "python3 --version",
+        "hint": "Print the installed Python version."
+      },
+      {
+        "id": "ubuntu_sandbox_3",
+        "title": "Capture the workstation flag",
+        "command": "cat flag.txt",
+        "hint": "Read flag.txt and submit its contents.",
+        "isFlagObjective": true
+      }
+    ],
+    "flag": "RANGE{ubuntu_workstation}"
+  }
 ];
 
+let osFilter = 'All';
 let filter = 'All labs', query = '', session = null, selected = null, view = 'labs', tab = 'Terminal', history = [], totalObjectives = 0, launchTimer;
 let activeXterm = null, activeWs = null, activeFitAddon = null;
 let currentTermFontSize = parseInt(localStorage.getItem('range-term-font-size')) || 14;
@@ -385,20 +941,20 @@ function catalog() {
     <section class="feature">
       <div class="featurecopy">
         <div class="feature-label"><span></span> FEATURED ENVIRONMENT</div>
-        <h2>Your Kali lab.<br><em>Ready to explore.</em></h2>
-        <p>A dedicated Kali Linux Rolling workspace with the essential security toolkit. Open a terminal and put your skills to work.</p>
-        <div class="feature-specs"><span>4 vCPU</span><span>3.5 GB RAM</span><span>Kali Rolling</span></div>
+        <h2>Kali or Ubuntu.<br><em>Your lab, ready.</em></h2>
+        <p>Choose Kali Linux for security tools or Ubuntu 24.04 for Linux fundamentals, permissions, and log analysis. Each lab has its own container and progress.</p>
+        <div class="feature-specs"><span>4 vCPU</span><span>3.5 GB RAM</span><span>Kali Rolling · Ubuntu 24.04</span></div>
         <div class="featureactions">
           <button class="primary" data-launch="kali-sandbox">Launch Kali lab <span>↗</span></button>
-          <button class="feature-secondary" data-launch="linux">Start with Linux basics <span>→</span></button>
+          <button class="feature-secondary" data-launch="ubuntu-sandbox">Launch Ubuntu lab <span>→</span></button>
         </div>
       </div>
       <div class="workspace-art" aria-hidden="true">
         <div class="art-orbit art-orbit-one"></div><div class="art-orbit art-orbit-two"></div>
         <div class="art-platform art-platform-back"></div><div class="art-platform art-platform-front"></div>
         <div class="art-terminal">
-          <div class="art-terminal-bar"><span><i></i><i></i><i></i></span><small>kali / workspace</small><b>⌘</b></div>
-          <div class="art-terminal-content"><span class="art-prompt">~ / ready to build</span><strong>&gt;_</strong><div class="art-code-line"></div><div class="art-code-line short"></div><p>KALI LINUX <span>ROLLING</span></p></div>
+          <div class="art-terminal-bar"><span><i></i><i></i><i></i></span><small>linux / workspace</small><b>⌘</b></div>
+          <div class="art-terminal-content"><span class="art-prompt">~ / ready to build</span><strong>&gt;_</strong><div class="art-code-line"></div><div class="art-code-line short"></div><p>KALI <span>+ UBUNTU</span></p></div>
         </div>
         <div class="art-floating-tag"><span>⌁</span> Your isolated workspace</div>
       </div>
@@ -418,10 +974,17 @@ function catalog() {
     </div>
     <div class="cards" id="cards"></div>
   `;
+  const osControls = document.createElement('div');
+  osControls.className = 'os-lab-filters';
+  osControls.setAttribute('role', 'group');
+  osControls.setAttribute('aria-label', 'Lab operating system');
+  osControls.innerHTML = ['All', 'Kali Linux', 'Ubuntu'].map(os => `<button class="secondary" data-os-filter="${os}" aria-pressed="${osFilter === os}">${os === 'All' ? 'All operating systems' : os + ' labs'}</button>`).join('');
+  $('#cards').before(osControls);
+  osControls.querySelectorAll('button').forEach(button => button.onclick = () => { osFilter = button.dataset.osFilter; catalog(); });
   renderCards();
   $('#search').oninput = e => { query = e.target.value; renderCards(); };
   document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { filter = b.dataset.filter; catalog(); });
-  $('#open-sandbox').onclick = () => openLaunch('linux');
+  $('#open-sandbox').onclick = () => openLaunch(osFilter === 'Ubuntu' ? 'ubuntu-sandbox' : 'kali-sandbox');
   bindLaunch();
   init3DTilt();
 }
@@ -430,9 +993,12 @@ function renderCards() {
   const catBadge = $('#catalog-badge');
   if (catBadge) catBadge.textContent = String(labs.length).padStart(2, '0');
   if (!$('#cards') || !$('#result-count')) return;
-  const result = labs.filter(l => (filter === 'All labs' || l.level === filter) && `${l.name} ${l.category} ${l.tags.join(' ')} ${l.os}`.toLowerCase().includes(query.toLowerCase()));
+  const result = labs.filter(l => (osFilter === 'All' || l.os === osFilter) && (filter === 'All labs' || l.level === filter) && `${l.name} ${l.category} ${l.tags.join(' ')} ${l.os}`.toLowerCase().includes(query.toLowerCase()));
   $('#result-count').textContent = `${result.length} ${result.length === 1 ? 'lab' : 'labs'} to explore`;
-  $('#cards').innerHTML = result.length ? result.map(l => `
+  $('#cards').innerHTML = result.length ? ['Kali Linux', 'Ubuntu'].map(os => {
+    const group = result.filter(l => l.os === os);
+    if (!group.length) return '';
+    return `<div class="os-lab-heading"><h2>${os === 'Ubuntu' ? 'Ubuntu labs' : 'Kali Linux labs'}</h2><p>${group.length} dedicated labs · ${os === 'Ubuntu' ? 'Ubuntu 24.04' : 'Kali Rolling'}</p></div>` + group.map(l => `
     <article class="card ${l.id === 'kali-sandbox' ? 'card-kali' : ''}">
       <div class="cardtop">
         <div class="labicon ${l.color}" aria-hidden="true">${l.id === 'kali-sandbox' ? '>_' : l.icon}</div>
@@ -447,14 +1013,14 @@ function renderCards() {
         <button data-launch="${l.id}">Launch lab <span>↗</span></button>
       </div>
     </article>
-  `).join('') : `
+  `).join(''); }).join('') : `
     <div class="empty" style="grid-column:1/-1">
       <h2>No labs found</h2>
       <p>Try another topic or difficulty.</p>
       <button class="secondary" id="clear-search">Clear filters</button>
     </div>
   `;
-  if ($('#clear-search')) $('#clear-search').onclick = () => { filter = 'All labs'; query = ''; catalog(); };
+  if ($('#clear-search')) $('#clear-search').onclick = () => { filter = 'All labs'; osFilter = 'All'; query = ''; catalog(); };
   bindLaunch();
   init3DTilt();
 }
@@ -475,13 +1041,17 @@ function openLaunch(id) {
   $('#launch-title').textContent = lab.name;
   const osRadio = document.querySelector(`input[name="os"][value="${lab.os}"]`);
   if (osRadio) osRadio.checked = true;
+  document.querySelectorAll('input[name="os"]').forEach(input => {
+    input.disabled = input.value !== lab.os;
+    input.closest('label').hidden = input.value !== lab.os;
+  });
   $('#launch-dialog').showModal();
   return { status: 'configuration_open', labId: id };
 }
 
 $('#confirm-launch').onclick = async () => {
   if (!selected) return;
-  const os = $('input[name="os"]:checked').value;
+  const os = selected.os;
   $('#confirm-launch').disabled = true;
   $('#confirm-launch').textContent = 'Provisioning isolated container…';
 
@@ -1059,7 +1629,7 @@ async function renderSessionHub() {
           liveSessions.forEach(ls => {
             const existing = list.find(s => s.id === ls.id);
             if (!existing) {
-              const labObj = labs.find(l => l.id === ls.labId) || { name: 'Kali Linux Rolling Lab' };
+              const labObj = labs.find(l => l.id === ls.labId) || { name: 'Linux lab' };
               list.unshift({
                 id: ls.id,
                 labId: ls.labId,
@@ -1354,7 +1924,7 @@ function renderHubCommands(container) {
             ${new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
           <span class="session-os-badge kali" style="font-size:10.5px; padding:2px 8px; flex-shrink:0;">
-            ${escapeHtml(c.labName || 'Kali Lab')}
+            ${escapeHtml(c.labName || 'Linux lab')}
           </span>
           <code class="cmd-snippet-pill">${escapeHtml(c.prompt || '')}${escapeHtml(c.command)}</code>
         </div>
@@ -1533,8 +2103,8 @@ function workspace() {
           </div>
           <div class="screenbody" id="screenbody" role="tabpanel"></div>
           <div class="screen-fullscreen-footer" id="screen-fs-footer" style="display:${isModalFullscreen ? 'flex' : 'none'};">
-            <span>⌑ Subnet: 10.10.0.0/24 · Workstation: 10.10.0.2 · ${session.os === 'Ubuntu' ? 'ubuntu' : 'root'}@kali: ~</span>
-            <span>${isLiveApi ? 'Live Docker Sandbox · Genuine Rolling OS' : 'Local Environment'}</span>
+            <span>⌑ Subnet: 10.10.0.0/24 · Workstation: 10.10.0.2 · root@${session.os === 'Ubuntu' ? 'ubuntu' : 'kali'}: ~</span>
+            <span>${isLiveApi ? (session.os === 'Ubuntu' ? 'Ubuntu 24.04 · Live container' : 'Live Docker Sandbox · Genuine Rolling OS') : 'Local Environment'}</span>
             <button class="exit-fs-pill" id="exit-fs-pill-btn">Press Esc or click to Exit Full Screen ✕</button>
           </div>
         </section>
@@ -1711,6 +2281,150 @@ window._kaliWinState = window._kaliWinState || {
   appMenu: false,
   placesMenu: false
 };
+
+function renderUbuntuDesktop(container) {
+  const date = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  container.innerHTML = `
+    <div class="ubuntu-desktop">
+      <header class="ubuntu-panel"><button id="ubuntu-activities">Activities</button><span>${date}</span><span aria-label="Ubuntu session">Ubuntu 24.04 <span aria-hidden="true"> · ◉</span></span></header>
+      <div class="ubuntu-wallpaper" aria-hidden="true"><div class="ubuntu-orbit"></div><div class="ubuntu-brand">ubuntu<span>24.04 LTS</span></div></div>
+      <nav class="ubuntu-dock" aria-label="Ubuntu applications">
+        <button id="ubuntu-open-terminal" title="Open live Ubuntu terminal" aria-label="Open live Ubuntu terminal"><span class="ubuntu-terminal-icon">&gt;_</span></button>
+        <button id="ubuntu-open-files" title="View container files" aria-label="View container files"><span class="ubuntu-folder-icon">▰</span></button>
+        <button id="ubuntu-open-about" title="About Ubuntu workspace" aria-label="About Ubuntu workspace"><span class="ubuntu-settings-icon">⚙</span></button>
+        <button id="ubuntu-show-apps" title="Show applications" aria-label="Show applications" class="ubuntu-apps-icon">⠿</button>
+      </nav>
+      <section class="ubuntu-window" id="ubuntu-app-window" aria-label="Ubuntu application window">
+        <header class="ubuntu-window-bar"><strong id="ubuntu-window-title">Terminal</strong><div><button id="ubuntu-minimize" aria-label="Minimize window">−</button><button id="ubuntu-maximize" aria-label="Maximize window">□</button><button id="ubuntu-close" aria-label="Close window">×</button></div></header>
+        <div id="ubuntu-app-content" class="ubuntu-terminal"></div>
+      </section>
+      <div class="ubuntu-desktop-caption">Ubuntu workspace · Live container terminal and files</div>
+    </div>`;
+  const windowEl = container.querySelector('#ubuntu-app-window');
+  const content = container.querySelector('#ubuntu-app-content');
+  const title = container.querySelector('#ubuntu-window-title');
+  const stopTerminal = () => {
+    if (activeWs) { activeWs.close(); activeWs = null; }
+    if (activeXterm) { activeXterm.dispose(); activeXterm = null; }
+  };
+  const show = (name, terminal = false) => {
+    stopTerminal();
+    windowEl.hidden = false;
+    title.textContent = name;
+    content.className = terminal ? 'ubuntu-terminal' : 'ubuntu-app-content';
+    content.replaceChildren();
+  };
+  const terminal = () => { show('Terminal — root@ubuntu: ~', true); screen(content, true); };
+  const files = async () => {
+    show('Files — /root');
+    content.innerHTML = '<div class="ubuntu-file-toolbar">Home / root <button id="ubuntu-refresh-files">Refresh</button></div><pre class="ubuntu-file-output">Loading container files…</pre>';
+    const output = content.querySelector('pre');
+    content.querySelector('button').onclick = files;
+    try {
+      if (!isLiveApi) throw new Error('Launch a live Ubuntu session to view container files.');
+      const response = await fetch(`${API_BASE}/api/sessions/${session.id}/command`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: 'ls -lah /root' })
+      });
+      if (!response.ok) throw new Error('Could not read container files. Reconnect your session and try again.');
+      const result = await response.json();
+      output.textContent = result.output;
+    } catch (error) { output.textContent = error.message; }
+  };
+  const about = () => {
+    show('About this workspace');
+    content.innerHTML = '<div class="ubuntu-about"><div class="ubuntu-about-logo">ubuntu</div><h2>Ubuntu 24.04 LTS</h2><p>A real Ubuntu container for your Linux lab.</p><p>The terminal executes commands and Files reads your container’s /root directory.</p><p>This desktop is a web workspace inspired by Ubuntu; it is not a streamed GNOME desktop.</p><button class="primary" id="ubuntu-about-terminal">Open terminal</button></div>';
+    content.querySelector('button').onclick = terminal;
+  };
+  const apps = () => {
+    show('Applications');
+    content.innerHTML = '<div class="ubuntu-app-grid"><button data-ubuntu-app="terminal"><span>&gt;_</span>Terminal<small>Live Ubuntu shell</small></button><button data-ubuntu-app="files"><span>▰</span>Files<small>Container directory</small></button><button data-ubuntu-app="about"><span>⚙</span>About<small>Ubuntu workspace</small></button></div>';
+    content.querySelectorAll('[data-ubuntu-app]').forEach(button => { button.onclick = ({terminal, files, about})[button.dataset.ubuntuApp]; });
+  };
+  container.querySelector('#ubuntu-open-terminal').onclick = terminal;
+  container.querySelector('#ubuntu-open-files').onclick = files;
+  container.querySelector('#ubuntu-open-about').onclick = about;
+  container.querySelector('#ubuntu-activities').onclick = apps;
+  container.querySelector('#ubuntu-show-apps').onclick = apps;
+  container.querySelector('#ubuntu-minimize').onclick = () => { windowEl.hidden = true; };
+  container.querySelector('#ubuntu-close').onclick = () => { stopTerminal(); windowEl.hidden = true; };
+  container.querySelector('#ubuntu-maximize').onclick = () => {
+    windowEl.classList.toggle('ubuntu-maximized');
+    window.dispatchEvent(new Event('resize'));
+  };
+  terminal();
+}
+
+function renderLiveKaliDesktop(container) {
+  const date = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  container.innerHTML = `
+    <div class="kali-live-desktop">
+      <header class="kali-live-panel"><button id="kali-live-activities">Applications</button><span>${date}</span><span aria-label="Kali session">Kali Rolling <span aria-hidden="true"> · ◉</span></span></header>
+      <div class="kali-live-wallpaper" aria-hidden="true"><div class="kali-live-orbit"></div><div class="kali-live-brand">KALI LINUX<span>ROLLING</span></div></div>
+      <nav class="kali-live-dock" aria-label="Kali applications">
+        <button id="kali-live-open-terminal" title="Open live Kali terminal" aria-label="Open live Kali terminal"><span class="kali-live-terminal-icon">&gt;_</span></button>
+        <button id="kali-live-open-files" title="View container files" aria-label="View container files"><span class="kali-live-folder-icon">▰</span></button>
+        <button id="kali-live-open-about" title="About Kali workspace" aria-label="About Kali workspace"><span class="kali-live-settings-icon">⚙</span></button>
+        <button id="kali-live-show-apps" title="Show applications" aria-label="Show applications" class="kali-live-apps-icon">⠿</button>
+      </nav>
+      <section class="kali-live-window" id="kali-live-app-window" aria-label="Kali application window">
+        <header class="kali-live-window-bar"><strong id="kali-live-window-title">Terminal</strong><div><button id="kali-live-minimize" aria-label="Minimize window">−</button><button id="kali-live-maximize" aria-label="Maximize window">□</button><button id="kali-live-close" aria-label="Close window">×</button></div></header>
+        <div id="kali-live-app-content" class="kali-live-terminal"></div>
+      </section>
+      <div class="kali-live-desktop-caption">Kali workspace · Live container terminal and files</div>
+    </div>`;
+  const windowEl = container.querySelector('#kali-live-app-window');
+  const content = container.querySelector('#kali-live-app-content');
+  const title = container.querySelector('#kali-live-window-title');
+  const stopTerminal = () => {
+    if (activeWs) { activeWs.close(); activeWs = null; }
+    if (activeXterm) { activeXterm.dispose(); activeXterm = null; }
+  };
+  const show = (name, terminal = false) => {
+    stopTerminal();
+    windowEl.hidden = false;
+    title.textContent = name;
+    content.className = terminal ? 'kali-live-terminal' : 'kali-live-app-content';
+    content.replaceChildren();
+  };
+  const terminal = () => { show('Terminal — root@kali: ~', true); screen(content, true); };
+  const files = async () => {
+    show('Files — /root');
+    content.innerHTML = '<div class="kali-live-file-toolbar">Home / root <button id="kali-live-refresh-files">Refresh</button></div><pre class="kali-live-file-output">Loading container files…</pre>';
+    const output = content.querySelector('pre');
+    content.querySelector('button').onclick = files;
+    try {
+      if (!isLiveApi) throw new Error('Launch a live Kali session to view container files.');
+      const response = await fetch(`${API_BASE}/api/sessions/${session.id}/command`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: 'ls -lah /root' })
+      });
+      if (!response.ok) throw new Error('Could not read container files. Reconnect your session and try again.');
+      const result = await response.json();
+      output.textContent = result.output;
+    } catch (error) { output.textContent = error.message; }
+  };
+  const about = () => {
+    show('About this workspace');
+    content.innerHTML = '<div class="kali-live-about"><div class="kali-live-about-logo">Kali Linux</div><h2>Kali Linux Rolling</h2><p>A real Kali container for your Linux lab.</p><p>The terminal executes commands and Files reads your container’s /root directory.</p><p>This desktop is a web workspace inspired by Kali; it is not a streamed Xfce desktop.</p><button class="primary" id="kali-live-about-terminal">Open terminal</button></div>';
+    content.querySelector('button').onclick = terminal;
+  };
+  const apps = () => {
+    show('Applications');
+    content.innerHTML = '<div class="kali-live-app-grid"><button data-kali-live-app="terminal"><span>&gt;_</span>Terminal<small>Live Kali shell</small></button><button data-kali-live-app="files"><span>▰</span>Files<small>Container directory</small></button><button data-kali-live-app="about"><span>⚙</span>About<small>Kali workspace</small></button></div>';
+    content.querySelectorAll('[data-kali-live-app]').forEach(button => { button.onclick = ({terminal, files, about})[button.dataset.kaliLiveApp]; });
+  };
+  container.querySelector('#kali-live-open-terminal').onclick = terminal;
+  container.querySelector('#kali-live-open-files').onclick = files;
+  container.querySelector('#kali-live-open-about').onclick = about;
+  container.querySelector('#kali-live-activities').onclick = apps;
+  container.querySelector('#kali-live-show-apps').onclick = apps;
+  container.querySelector('#kali-live-minimize').onclick = () => { windowEl.hidden = true; };
+  container.querySelector('#kali-live-close').onclick = () => { stopTerminal(); windowEl.hidden = true; };
+  container.querySelector('#kali-live-maximize').onclick = () => {
+    windowEl.classList.toggle('kali-live-maximized');
+    window.dispatchEvent(new Event('resize'));
+  };
+  terminal();
+}
 
 function renderKaliDesktop(container) {
   if (!window._kaliWinState || typeof window._kaliWinState !== 'object') {
@@ -2973,7 +3687,7 @@ function renderKaliDesktop(container) {
   applyZoom(false);
 }
 
-function screen() {
+function screen(targetContainer = null, desktopTerminal = false) {
   if (activeWs) {
     try { activeWs.close(); } catch (e) {}
     activeWs = null;
@@ -2983,15 +3697,19 @@ function screen() {
     activeXterm = null;
   }
 
-  const container = $('#screenbody');
-  if (container) container.classList.toggle('has-desktop', tab === 'Desktop');
+  const container = targetContainer || $('#screenbody');
+  if (!targetContainer && container) {
+    container.classList.toggle('has-desktop', tab === 'Desktop');
+    container.classList.toggle('ubuntu-terminal', session?.os === 'Ubuntu' && tab === 'Terminal');
+    container.classList.toggle('kali-live-terminal', session?.os === 'Kali Linux' && tab === 'Terminal');
+  }
 
-  if (tab === 'Terminal') {
+  if (tab === 'Terminal' || desktopTerminal) {
     // If xterm.js CDN loaded and we are connected to Live API WebSocket
     if (window.Terminal && isLiveApi && session && session.id) {
       container.innerHTML = `
         <div class="termhead" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>${session.os === 'Ubuntu' ? 'ubuntu' : 'kali'}@cyberlab: ~/lab [Live WebSocket PTY Stream]</span>
+          <span>${session.os === 'Ubuntu' ? 'Terminal — root@ubuntu: ~' : 'Terminal — root@kali: ~'}</span>
           <div style="display:flex; align-items:center; gap:8px;">
             <div class="term-zoom-cluster">
               <button class="term-action-btn" id="term-zoom-out" title="${isModalFullscreen ? 'Zoom Out / Exit Full Screen (Ctrl −)' : 'Zoom Out Terminal Font (Ctrl −)'}">
@@ -3009,21 +3727,31 @@ function screen() {
             </div>
             <button class="term-save-btn" id="xterm-save-btn" title="Save terminal progress and download transcript (.txt)" style="font-size:11px; padding:2px 8px;"><span>💾</span> Save Log</button>
             <button id="reconnect-term-btn" style="font-size:11px; padding:2px 8px; border-radius:4px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:var(--cyan); cursor:pointer;">↺ Reconnect</button>
-            <span style="font-size:10px; color:#8fab51;">● xterm.js active</span>
+            <span style="font-size:10px; color:#8fab51;">${session.os === 'Ubuntu' ? '● Live Ubuntu shell' : '● Live Kali shell'}</span>
           </div>
         </div>
-        <div id="xterm-container" style="min-height:380px; height:100%; background:#000; border-radius:6px; padding:8px; overflow:hidden;"></div>
+        <div id="xterm-container" style="min-height:380px; height:100%; background:${session.os === 'Ubuntu' ? '#300a24' : '#17191f'}; border-radius:6px; padding:8px; overflow:hidden;"></div>
       `;
 
       try {
         const term = new window.Terminal({
           cursorBlink: true,
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: session.os === 'Ubuntu' ? '"Ubuntu Mono", "DejaVu Sans Mono", monospace' : 'ui-monospace, monospace',
           fontSize: currentTermFontSize,
-          theme: {
-            background: '#121a20',
-            foreground: '#c6d4dc',
-            cursor: '#d5f76b'
+          theme: session.os === 'Ubuntu' ? {
+            background: '#300a24', foreground: '#eeeeec', cursor: '#eeeeec',
+            selectionBackground: '#ffffff40', black: '#2e3436', red: '#cc0000',
+            green: '#4e9a06', yellow: '#c4a000', blue: '#3465a4', magenta: '#75507b',
+            cyan: '#06989a', white: '#d3d7cf', brightBlack: '#555753',
+            brightRed: '#ef2929', brightGreen: '#8ae234', brightYellow: '#fce94f',
+            brightBlue: '#729fcf', brightMagenta: '#ad7fa8', brightCyan: '#34e2e2', brightWhite: '#eeeeec'
+          } : {
+            background: '#17191f',
+            foreground: '#e6e6e6',
+            cursor: '#ffffff',
+            selectionBackground: '#367bf050',
+            blue: '#367bf0', brightBlue: '#61afef',
+            red: '#e06c75', green: '#98c379'
           }
         });
         const fitAddon = window.FitAddon ? new window.FitAddon.FitAddon() : null;
@@ -3150,7 +3878,8 @@ function screen() {
       runCommand($('#command').value);
     };
   } else if (tab === 'Desktop') {
-    renderKaliDesktop(container);
+    if (session.os === 'Ubuntu') renderUbuntuDesktop(container);
+    else renderLiveKaliDesktop(container);
   } else if (tab === 'Code editor') {
     container.innerHTML = `
       <div class="idefile">
@@ -3243,7 +3972,7 @@ function renderInlineCommandHistory(container) {
       <div class="cmd-history-item">
         <div style="display:flex; align-items:center; gap:10px; overflow:hidden; flex:1;">
           <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); flex-shrink:0;">${new Date(c.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-          <span class="session-os-badge kali" style="font-size:10px; padding:1px 6px; flex-shrink:0;">${escapeHtml(c.labName || 'Kali Lab')}</span>
+          <span class="session-os-badge kali" style="font-size:10px; padding:1px 6px; flex-shrink:0;">${escapeHtml(c.labName || 'Linux lab')}</span>
           <code class="cmd-snippet-pill">${escapeHtml(c.prompt || '')}${escapeHtml(c.command)}</code>
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
@@ -4057,7 +4786,7 @@ async function runCommand(raw) {
   }
 
   if (isLiveApi || session.lab.id === 'kali-sandbox') {
-    session.output.push('[Error] The live Kali command could not run. Check the backend and reconnect.');
+    session.output.push(`[Error] The live ${session.os} command could not run. Check the backend and reconnect.`);
     updateTermDisplay();
     return;
   }
@@ -4337,7 +5066,7 @@ function renderProgressSubTabContent(subtab, domains, badges, capturedFlags) {
         <div class="empty">
           <div style="font-size:40px; margin-bottom:12px;">🚩</div>
           <h2>Your Flag Vault is Awaiting Its First Capture</h2>
-          <p>Complete a lab's objectives in the terminal or Kali desktop to extract its cryptographic flag and store it permanently here.</p>
+          <p>Complete a lab's objectives in the Kali or Ubuntu terminal to extract its cryptographic flag and store it permanently here.</p>
           <button class="primary" id="browse-empty-labs">Launch Your First Lab ↗</button>
         </div>
       `;

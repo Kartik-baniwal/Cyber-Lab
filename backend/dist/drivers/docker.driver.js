@@ -7,6 +7,7 @@ exports.DockerDriver = void 0;
 const ws_1 = require("ws");
 const child_process_1 = require("child_process");
 const util_1 = __importDefault(require("util"));
+const command_policy_1 = require("../services/command-policy");
 const execFileAsync = util_1.default.promisify(child_process_1.execFile);
 const DOCKER_BIN = process.env.DOCKER_BIN || (process.platform === 'darwin' ? '/usr/local/bin/docker' : 'docker');
 /**
@@ -42,18 +43,23 @@ class DockerDriver {
             await execFileAsync(DOCKER_BIN, ['rm', '-f', wsContainerName]);
         }
         catch { }
-        const chosenImage = process.env.KALI_IMAGE || 'rangeforge/kali-custom:latest';
+        const isUbuntu = session.os === 'Ubuntu';
+        const chosenImage = isUbuntu
+            ? (process.env.UBUNTU_IMAGE || 'cyberrange/workstation-ubuntu:latest')
+            : (process.env.KALI_IMAGE || 'rangeforge/kali-custom:latest');
         try {
             await execFileAsync(DOCKER_BIN, ['image', 'inspect', chosenImage]);
         }
         catch {
-            throw new Error(`Full Kali image ${chosenImage} is missing. Run bash scripts/build-kali-image.sh first.`);
+            const imageName = isUbuntu ? 'Ubuntu' : 'Full Kali';
+            const buildScript = isUbuntu ? 'build-ubuntu-image.sh' : 'build-kali-image.sh';
+            throw new Error(`${imageName} image ${chosenImage} is missing. Run bash scripts/${buildScript} first.`);
         }
         await execFileAsync(DOCKER_BIN, [
             'run',
             '-d',
             '--name', wsContainerName,
-            '--hostname', 'kali',
+            '--hostname', isUbuntu ? 'ubuntu' : 'kali',
             '--cpus', '4',
             '--memory', '3584m',
             '--memory-swap', '3584m',
@@ -99,7 +105,7 @@ class DockerDriver {
         if (!cmd) {
             return { stdout: '', exitCode: 0 };
         }
-        const cleanCmd = cmd;
+        const cleanCmd = (0, command_policy_1.restrictsPwd)(session) ? `${command_policy_1.LINUX_SHELL_POLICY}\n${cmd}` : cmd;
         const wsContainerName = await this.ensureContainerRunning(session);
         console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cleanCmd}`);
         try {
@@ -120,11 +126,21 @@ class DockerDriver {
     }
     async attachTerminal(session, ws) {
         const wsContainerName = await this.ensureContainerRunning(session);
-        ws.send('\r\nConnected to real Kali Rolling. This container shares the Docker host kernel.\r\n');
+        let shellCommand = '/bin/bash -il';
+        if ((0, command_policy_1.restrictsPwd)(session)) {
+            // Install on every attachment so existing containers receive the policy
+            // when the learner reconnects. Bash handles editing/history/paste itself.
+            const rc = '[ -f /etc/profile ] && . /etc/profile\n[ -f ~/.bashrc ] && . ~/.bashrc\n' + command_policy_1.LINUX_SHELL_POLICY;
+            await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c',
+                'printf "%s\\n" "$1" > /tmp/cyberlab-linux.bashrc', '--', rc]);
+            shellCommand = '/bin/bash --rcfile /tmp/cyberlab-linux.bashrc -i';
+        }
+        const osName = session.os === 'Ubuntu' ? 'Ubuntu' : 'Kali Rolling';
+        ws.send(`\r\nConnected to real ${osName}. This container shares the Docker host kernel.\r\n`);
         // script allocates a real Linux PTY, preserving shell state, Ctrl-C, and interactive tools.
         const terminal = (0, child_process_1.spawn)(DOCKER_BIN, [
             'exec', '-i', '-e', 'TERM=xterm-256color', wsContainerName,
-            'script', '-qefc', '/bin/bash -il', '/dev/null'
+            'script', '-qefc', shellCommand, '/dev/null'
         ], { stdio: ['pipe', 'pipe', 'pipe'] });
         const send = (data) => {
             if (ws.readyState === ws_1.WebSocket.OPEN)

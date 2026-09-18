@@ -2,6 +2,7 @@ import { IOrchestratorDriver } from './orchestrator.interface';
 import { LabSession, ProvisionedEnvironment, CommandResult } from '../models/types';
 import { WebSocket } from 'ws';
 import { simulateKaliTool } from './kali-tools-sim';
+import { blocksPwd, PWD_BLOCKED_MESSAGE } from '../services/command-policy';
 
 /**
  * High-Fidelity Development & Simulation Driver
@@ -36,6 +37,9 @@ export class DevMockDriver implements IOrchestratorDriver {
     const raw = rawCommand.trim();
     // Normalize command by stripping wrappers: sudo, bash, sh, ./, /bin/, /usr/bin/
     let cmd = raw.replace(/^(sudo\s+|bash\s+|sh\s+|\.\/|\/bin\/|\/usr\/bin\/)+/i, '').trim();
+    if (blocksPwd(session, cmd)) {
+      return { stdout: `${PWD_BLOCKED_MESSAGE}\n`, exitCode: 126 };
+    }
     const l = session.lab;
     const isKali = session.os === 'Kali Linux';
 

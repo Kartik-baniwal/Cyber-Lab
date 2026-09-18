@@ -43,6 +43,8 @@ export class SessionManager {
       throw new Error(`Lab with id ${labId} not found`);
     }
 
+    if (os !== lab.os) throw new Error(`${lab.name} requires ${lab.os}. Choose a lab from the ${os} catalog instead.`);
+
     const sessionId = customSessionId || crypto.randomUUID();
     const dynamicFlag = this.generateDynamicFlag(userId, labId);
     const now = Date.now();

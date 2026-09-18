@@ -3,6 +3,7 @@ import { LAB_CATALOG } from '../models/labs.data';
 import { SessionManager } from '../services/session.manager';
 import { FlagService } from '../services/flag.service';
 import { OperatingSystem } from '../models/types';
+import { blocksPwd, PWD_BLOCKED_MESSAGE } from '../services/command-policy';
 
 const router = Router();
 const sessionManager = SessionManager.getInstance();
@@ -42,6 +43,10 @@ router.post('/sessions', async (req: Request, res: Response) => {
     if (!labId || !os) {
       return res.status(400).json({ error: 'Missing labId or os parameter' });
     }
+
+    const lab = LAB_CATALOG.find(l => l.id === labId);
+    if (!lab) return res.status(404).json({ error: 'Lab not found' });
+    if (os !== lab.os) return res.status(400).json({ error: `${lab.name} requires ${lab.os}. Choose the matching OS lab.` });
 
     // Check if user already has an active session
     const existing = sessionManager.getAllSessions().find(
@@ -119,6 +124,14 @@ router.post('/sessions/:id/command', async (req: Request, res: Response) => {
   }
 
   const cleanCmd = command.trim();
+  if (blocksPwd(session, cleanCmd)) {
+    return res.json({
+      command: cleanCmd,
+      output: `${PWD_BLOCKED_MESSAGE}\n`,
+      exitCode: 126,
+      completedObjectives: session.completedObjectives
+    });
+  }
   const lowCmd = cleanCmd.toLowerCase();
   const cmd0 = (session.lab.commands[0] || '').toLowerCase();
   const cmd1 = (session.lab.commands[1] || '').toLowerCase();

@@ -1,6 +1,7 @@
 import { WebSocket } from 'ws';
 import { SessionManager } from './session.manager';
 import { FlagService } from './flag.service';
+import { blocksPwd } from './command-policy';
 
 export class TerminalGateway {
   private static instance: TerminalGateway;
@@ -43,6 +44,7 @@ export class TerminalGateway {
         if (char === '\r' || char === '\n') {
           const command = submitted.trim();
           submitted = '';
+          if (blocksPwd(session!, command)) continue;
           if (command === session!.lab.commands[0]) {
             FlagService.getInstance().completeObjective(session!.id, 0);
           } else if (command === session!.lab.commands[1] && session!.completedObjectives.includes(0)) {
@@ -63,7 +65,7 @@ export class TerminalGateway {
       await sessionManager.getDriver().attachTerminal(session, ws);
     } catch (error) {
       console.error('[TerminalGateway] Terminal attachment failed:', error);
-      ws.send('\r\n[Error] Cannot start the real Kali terminal. Check Docker and the image build.\r\n');
+      ws.send(`\r\n[Error] Cannot start the ${session.os} terminal. Check Docker and the image build.\r\n`);
       ws.close();
     }
 

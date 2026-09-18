@@ -41,7 +41,7 @@ class TerminalSimulator {
     this.output = document.getElementById('terminal-output');
     this.input = document.getElementById('terminal-input');
     this.statsLabel = document.getElementById('term-stats');
-    
+
     this.commandHistory = [];
     this.historyIndex = -1;
     this.commandsRun = 0;
@@ -280,8 +280,8 @@ function initLabCatalog() {
     container.innerHTML = '';
 
     const filtered = LAB_CATALOG.filter(lab => {
-      const matchFilter = (activeFilter === 'all' || lab.category === activeFilter);
-      const matchSearch = searchQuery === '' || 
+      const matchFilter = (activeFilter === 'all' || lab.category === activeFilter || lab.os.startsWith(activeFilter));
+      const matchSearch = searchQuery === '' ||
         lab.name.toLowerCase().includes(searchQuery) ||
         lab.description.toLowerCase().includes(searchQuery) ||
         lab.tags.some(t => t.toLowerCase().includes(searchQuery));
@@ -496,9 +496,9 @@ function initCalculator() {
     const objectives = parseInt((sliderObjectives as any)?.value || 0, 10);
     const flags = parseInt((sliderFlags as any)?.value || 0, 10);
 
-    if (valLabs) valLabs.textContent = `${labs} / 7`;
-    if (valObjectives) valObjectives.textContent = `${objectives} / 21`;
-    if (valFlags) valFlags.textContent = `${flags} / 7`;
+    if (valLabs) valLabs.textContent = `${labs} / ${LAB_CATALOG.length}`;
+    if (valObjectives) valObjectives.textContent = `${objectives} / ${LAB_CATALOG.length * 3}`;
+    if (valFlags) valFlags.textContent = `${flags} / ${LAB_CATALOG.length}`;
 
     // Official Formula from Documentation of Cyber Lab
     // readinessScore = min(100, round((labsCompleted x 20 + totalObjectives x 4 + capturedFlags x 8) / 1.7))
@@ -642,7 +642,7 @@ class PresentationDeck {
     this.counter = document.getElementById('deck-slide-counter');
     this.btnPrev = document.getElementById('deck-btn-prev');
     this.btnNext = document.getElementById('deck-btn-next');
-    
+
     this.total = PRESENTATION_SLIDES.length;
     this.current = 1;
 
@@ -911,7 +911,7 @@ function fallbackCopy(text) {
 }
 
 function escapeHtml(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
@@ -1050,7 +1050,7 @@ function initAuthGate() {
 
   btnLogin?.addEventListener('click', (e) => {
     e.preventDefault();
-    window.location.href = '/RangeForge-Project/';
+    window.location.href = '/workspace/';
   });
 
   btnSignup?.addEventListener('click', () => {
@@ -1059,7 +1059,7 @@ function initAuthGate() {
   });
 
   document.getElementById('operator-badge-pill')?.addEventListener('click', () => {
-    window.location.href = '/RangeForge-Project/';
+    window.location.href = '/workspace/';
   });
 
   tabLogin?.addEventListener('click', () => setMode('login'));
@@ -1119,7 +1119,7 @@ function initAuthGate() {
       showToast(`Access Granted! Welcome Operator ${account.name}. Opening Dashboard...`, '⚡');
 
       setTimeout(() => {
-        window.location.href = '/RangeForge-Project/';
+        window.location.href = '/workspace/';
       }, 500);
 
     } else {
@@ -1179,7 +1179,7 @@ function initAuthGate() {
       showToast(`Account Created! Welcome Operator ${name}. Opening Dashboard...`, '🛡️');
 
       setTimeout(() => {
-        window.location.href = '/RangeForge-Project/';
+        window.location.href = '/workspace/';
       }, 500);
     }
   });

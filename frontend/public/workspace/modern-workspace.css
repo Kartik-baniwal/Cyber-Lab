@@ -464,3 +464,149 @@ html.auth-mode main, body.auth-mode main { max-width: 1280px; padding: 36px 50px
   *, *::before, *::after { animation: none !important; transition-duration: 0s !important; }
   .card, .feature, .metric { transform: none !important; }
 }
+
+/* Ubuntu workspace: scoped to Ubuntu sessions only. */
+.ubuntu-desktop { position:relative; min-height:690px; height:100%; overflow:hidden; color:#fff; background:#45152e; font-family:Ubuntu,Arial,sans-serif; }
+.ubuntu-panel { position:relative; z-index:3; display:flex; justify-content:space-between; align-items:center; height:34px; padding:0 18px; background:#191919; color:#f5f5f5; font-size:12px; font-weight:600; }
+.ubuntu-panel button { background:none; border:0; color:inherit; cursor:pointer; padding:8px; }
+.ubuntu-wallpaper { position:absolute; inset:34px 0 0; background:radial-gradient(ellipse at 85% 15%,#e9542055,transparent 60%),linear-gradient(140deg,#30102e 5%,#77234b 55%,#ca482b 120%); overflow:hidden; }
+.ubuntu-wallpaper::after { content:''; position:absolute; width:900px; height:900px; left:22%; top:5%; border:1px solid #ffad9733; transform:rotate(35deg); border-radius:90px; box-shadow:0 0 0 80px #ffb8a008,0 0 0 160px #ffb8a008; }
+.ubuntu-orbit { position:absolute; width:380px; height:380px; border:2px solid #fbc7b922; border-radius:50%; right:-100px; top:12%; }
+.ubuntu-brand { position:absolute; bottom:65px; right:50px; font-size:52px; letter-spacing:-3px; color:#ffffffcc; }
+.ubuntu-brand span { display:block; font-size:12px; letter-spacing:4px; text-align:right; }
+.ubuntu-dock { position:absolute; left:0; top:34px; bottom:0; width:68px; background:#1c111bc4; z-index:3; display:flex; align-items:center; flex-direction:column; gap:10px; padding:20px 6px; border-right:1px solid #ffffff15; }
+.ubuntu-dock button { display:grid; place-items:center; width:52px; height:52px; border:0; border-radius:9px; background:transparent; color:#fff; cursor:pointer; }
+.ubuntu-dock button:hover,.ubuntu-dock button:focus-visible { background:#ffffff26; outline:2px solid #e95420; }
+.ubuntu-terminal-icon { border:2px solid #b9b9b9; background:#292929; padding:5px; font:700 21px monospace; border-radius:5px; }
+.ubuntu-folder-icon { background:#e5a34d; color:#ffe2b2; width:37px; height:31px; border-radius:4px; font-size:32px; line-height:22px; border-top:5px solid #f6c16a; }
+.ubuntu-settings-icon { font-size:37px; color:#ddd; }
+.ubuntu-dock .ubuntu-apps-icon { margin-top:auto; font-size:45px; }
+.ubuntu-window { position:relative; z-index:2; margin:42px 34px 65px 102px; border:1px solid #ffffff24; border-radius:11px; overflow:hidden; background:#300a24; box-shadow:0 24px 65px #16051490; }
+.ubuntu-window[hidden] { display:none; }
+.ubuntu-window.ubuntu-maximized { margin:0 0 28px 68px; border-radius:0; }
+.ubuntu-window-bar { display:flex; align-items:center; justify-content:space-between; padding:11px 15px; height:44px; background:#303030; color:#eee; font-size:12px; }
+.ubuntu-window-bar button { background:#454545; color:#ddd; border:0; border-radius:50%; width:24px; height:24px; margin-left:8px; cursor:pointer; }
+.ubuntu-window-bar button:last-child { background:#e95420; color:white; }
+.ubuntu-window-bar button:hover { filter:brightness(1.2); }
+.ubuntu-terminal { background:#300a24 !important; color:#eee; }
+.ubuntu-terminal .termhead { flex-wrap:wrap; gap:10px; padding:12px; margin:0; border-bottom:1px solid #ffffff15; background:#2c0921; font-size:12px; color:#f1d4e7; }
+.ubuntu-terminal .termhead > div { flex-wrap:wrap; }
+.ubuntu-terminal #xterm-container { min-height:390px !important; height:440px !important; border-radius:0 !important; padding:14px !important; }
+.ubuntu-terminal .term-action-btn,.ubuntu-terminal .term-save-btn,.ubuntu-terminal .term-zoom-badge,.ubuntu-terminal #reconnect-term-btn { color:#eee !important; background:#ffffff0d !important; border-color:#ffffff30 !important; }
+.ubuntu-terminal .term-zoom-cluster { border-color:#ffffff30; }
+.ubuntu-app-content { min-height:440px; background:#fafafa; color:#292929; padding:24px; }
+.ubuntu-file-toolbar { display:flex; justify-content:space-between; align-items:center; padding-bottom:20px; border-bottom:1px solid #ddd; }
+.ubuntu-file-toolbar button { border:1px solid #ddd; border-radius:6px; padding:7px 12px; background:white; color:#333; cursor:pointer; }
+.ubuntu-file-output { overflow:auto; margin-top:20px; font:13px/1.8 monospace; color:#333; white-space:pre; }
+.ubuntu-about { max-width:480px; margin:20px auto; text-align:center; }
+.ubuntu-about-logo { color:#e95420; font-size:50px; letter-spacing:-3px; }
+.ubuntu-about h2 { color:#333; margin:14px 0; }
+.ubuntu-about p { color:#666; line-height:1.6; margin:16px 0; }
+.ubuntu-about .primary { background:#e95420; color:white; }
+.ubuntu-app-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:45px 0; }
+.ubuntu-app-grid button { display:flex; flex-direction:column; align-items:center; gap:12px; width:145px; padding:20px; border:1px solid #ddd; border-radius:12px; background:white; color:#333; cursor:pointer; }
+.ubuntu-app-grid button:hover { border-color:#e95420; background:#fff4ee; }
+.ubuntu-app-grid span { font:36px monospace; color:#e95420; }
+.ubuntu-app-grid small { color:#777; font-size:11px; }
+.ubuntu-desktop-caption { position:absolute; bottom:10px; left:85px; font-size:11px; color:#f2dce7; }
+@media(max-width:800px) { .ubuntu-window { margin:20px 10px 65px 78px; } .ubuntu-panel { font-size:10px; padding:0 8px; } .ubuntu-brand { right:20px; } .ubuntu-terminal .termhead { font-size:10px; } }
+@media(max-width:600px) {
+  .ubuntu-dock { top:auto; right:0; bottom:0; width:auto; height:64px; flex-direction:row; justify-content:center; padding:6px; border-right:0; }
+  .ubuntu-dock .ubuntu-apps-icon { margin-top:0; }
+  .ubuntu-window,.ubuntu-window.ubuntu-maximized { margin:16px 8px 100px; }
+  .ubuntu-window-bar { padding:8px; }
+  .ubuntu-window-bar strong { font-size:10px; }
+  .ubuntu-window-bar button { margin-left:4px; width:20px; height:20px; }
+  .ubuntu-desktop-caption { bottom:76px; left:12px; right:12px; font-size:10px; }
+  .ubuntu-terminal .termhead > span { display:none; }
+  .ubuntu-terminal #xterm-container { padding:8px !important; }
+  .ubuntu-panel > span:last-child { font-size:9px; }
+}
+
+/* Kali workspace: scoped to Kali sessions only. */
+.kali-live-desktop { position:relative; min-height:690px; height:100%; overflow:hidden; color:#fff; background:#45152e; font-family:Kali,Arial,sans-serif; }
+.kali-live-panel { position:relative; z-index:3; display:flex; justify-content:space-between; align-items:center; height:34px; padding:0 18px; background:#191919; color:#f5f5f5; font-size:12px; font-weight:600; }
+.kali-live-panel button { background:none; border:0; color:inherit; cursor:pointer; padding:8px; }
+.kali-live-wallpaper { position:absolute; inset:34px 0 0; background:radial-gradient(ellipse at 85% 15%,#367bf055,transparent 60%),linear-gradient(140deg,#30102e 5%,#77234b 55%,#ca482b 120%); overflow:hidden; }
+.kali-live-wallpaper::after { content:''; position:absolute; width:900px; height:900px; left:22%; top:5%; border:1px solid #ffad9733; transform:rotate(35deg); border-radius:90px; box-shadow:0 0 0 80px #ffb8a008,0 0 0 160px #ffb8a008; }
+.kali-live-orbit { position:absolute; width:380px; height:380px; border:2px solid #fbc7b922; border-radius:50%; right:-100px; top:12%; }
+.kali-live-brand { position:absolute; bottom:65px; right:50px; font-size:52px; letter-spacing:-3px; color:#ffffffcc; }
+.kali-live-brand span { display:block; font-size:12px; letter-spacing:4px; text-align:right; }
+.kali-live-dock { position:absolute; left:0; top:34px; bottom:0; width:68px; background:#1c111bc4; z-index:3; display:flex; align-items:center; flex-direction:column; gap:10px; padding:20px 6px; border-right:1px solid #ffffff15; }
+.kali-live-dock button { display:grid; place-items:center; width:52px; height:52px; border:0; border-radius:9px; background:transparent; color:#fff; cursor:pointer; }
+.kali-live-dock button:hover,.kali-live-dock button:focus-visible { background:#ffffff26; outline:2px solid #367bf0; }
+.kali-live-terminal-icon { border:2px solid #b9b9b9; background:#292929; padding:5px; font:700 21px monospace; border-radius:5px; }
+.kali-live-folder-icon { background:#e5a34d; color:#ffe2b2; width:37px; height:31px; border-radius:4px; font-size:32px; line-height:22px; border-top:5px solid #f6c16a; }
+.kali-live-settings-icon { font-size:37px; color:#ddd; }
+.kali-live-dock .kali-live-apps-icon { margin-top:auto; font-size:45px; }
+.kali-live-window { position:relative; z-index:2; margin:42px 34px 65px 102px; border:1px solid #ffffff24; border-radius:11px; overflow:hidden; background:#17191f; box-shadow:0 24px 65px #16051490; }
+.kali-live-window[hidden] { display:none; }
+.kali-live-window.kali-live-maximized { margin:0 0 28px 68px; border-radius:0; }
+.kali-live-window-bar { display:flex; align-items:center; justify-content:space-between; padding:11px 15px; height:44px; background:#303030; color:#eee; font-size:12px; }
+.kali-live-window-bar button { background:#454545; color:#ddd; border:0; border-radius:50%; width:24px; height:24px; margin-left:8px; cursor:pointer; }
+.kali-live-window-bar button:last-child { background:#367bf0; color:white; }
+.kali-live-window-bar button:hover { filter:brightness(1.2); }
+.kali-live-terminal { background:#17191f !important; color:#eee; }
+.kali-live-terminal .termhead { flex-wrap:wrap; gap:10px; padding:12px; margin:0; border-bottom:1px solid #ffffff15; background:#21232b; font-size:12px; color:#dce4f3; }
+.kali-live-terminal .termhead > div { flex-wrap:wrap; }
+.kali-live-terminal #xterm-container { min-height:390px !important; height:440px !important; border-radius:0 !important; padding:14px !important; }
+.kali-live-terminal .term-action-btn,.kali-live-terminal .term-save-btn,.kali-live-terminal .term-zoom-badge,.kali-live-terminal #reconnect-term-btn { color:#eee !important; background:#ffffff0d !important; border-color:#ffffff30 !important; }
+.kali-live-terminal .term-zoom-cluster { border-color:#ffffff30; }
+.kali-live-app-content { min-height:440px; background:#fafafa; color:#292929; padding:24px; }
+.kali-live-file-toolbar { display:flex; justify-content:space-between; align-items:center; padding-bottom:20px; border-bottom:1px solid #ddd; }
+.kali-live-file-toolbar button { border:1px solid #ddd; border-radius:6px; padding:7px 12px; background:white; color:#333; cursor:pointer; }
+.kali-live-file-output { overflow:auto; margin-top:20px; font:13px/1.8 monospace; color:#333; white-space:pre; }
+.kali-live-about { max-width:480px; margin:20px auto; text-align:center; }
+.kali-live-about-logo { color:#367bf0; font-size:50px; letter-spacing:-3px; }
+.kali-live-about h2 { color:#333; margin:14px 0; }
+.kali-live-about p { color:#666; line-height:1.6; margin:16px 0; }
+.kali-live-about .primary { background:#367bf0; color:white; }
+.kali-live-app-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:45px 0; }
+.kali-live-app-grid button { display:flex; flex-direction:column; align-items:center; gap:12px; width:145px; padding:20px; border:1px solid #ddd; border-radius:12px; background:white; color:#333; cursor:pointer; }
+.kali-live-app-grid button:hover { border-color:#367bf0; background:#fff4ee; }
+.kali-live-app-grid span { font:36px monospace; color:#367bf0; }
+.kali-live-app-grid small { color:#777; font-size:11px; }
+.kali-live-desktop-caption { position:absolute; bottom:10px; left:85px; font-size:11px; color:#f2dce7; }
+@media(max-width:800px) { .kali-live-window { margin:20px 10px 65px 78px; } .kali-live-panel { font-size:10px; padding:0 8px; } .kali-live-brand { right:20px; } .kali-live-terminal .termhead { font-size:10px; } }
+@media(max-width:600px) {
+  .kali-live-dock { top:auto; right:0; bottom:0; width:auto; height:64px; flex-direction:row; justify-content:center; padding:6px; border-right:0; }
+  .kali-live-dock .kali-live-apps-icon { margin-top:0; }
+  .kali-live-window,.kali-live-window.kali-live-maximized { margin:16px 8px 100px; }
+  .kali-live-window-bar { padding:8px; }
+  .kali-live-window-bar strong { font-size:10px; }
+  .kali-live-window-bar button { margin-left:4px; width:20px; height:20px; }
+  .kali-live-desktop-caption { bottom:76px; left:12px; right:12px; font-size:10px; }
+  .kali-live-terminal .termhead > span { display:none; }
+  .kali-live-terminal #xterm-container { padding:8px !important; }
+  .kali-live-panel > span:last-child { font-size:9px; }
+}
+
+
+/* Kali/Xfce-inspired shell, with artwork from the installed Kali image. */
+.kali-live-desktop { background:#10141e; font-family:Arial,sans-serif; }
+.kali-live-panel { background:#20232c; border-bottom:1px solid #3c414f; }
+.kali-live-wallpaper { background:#111826 url('assets/kali-cubes.jpg') center/cover no-repeat; }
+.kali-live-wallpaper::after,.kali-live-orbit,.kali-live-brand { display:none; }
+.kali-live-dock { background:#1e222dd9; width:68px; border-color:#64738a33; }
+.kali-live-window { border-radius:5px; border-color:#4d5668; box-shadow:0 18px 60px #0008; }
+.kali-live-window-bar { background:#272b36; height:36px; padding:6px 12px; }
+.kali-live-window-bar button { border-radius:3px; background:#353b49; }
+.kali-live-folder-icon { background:#367bf0; border-color:#6ca8ff; color:#b9d9ff; }
+.kali-live-settings-icon { color:#b6c1d4; }
+.kali-live-terminal .termhead { background:#21232b; color:#c6d0e0; }
+.kali-live-terminal #xterm-container { background:#17191f !important; }
+.kali-live-app-content { background:#242832; color:#e1e6ef; }
+.kali-live-file-output { color:#e1e6ef; }
+.kali-live-file-toolbar { border-color:#424b5c; }
+.kali-live-about h2,.kali-live-about p { color:#d0d8e7; }
+.kali-live-app-grid button { background:#303644; color:#fff; border-color:#485165; }
+.kali-live-app-grid button:hover { background:#39465e; border-color:#367bf0; }
+.kali-live-app-grid small { color:#b6c1d4; }
+.kali-live-desktop-caption { color:#d5dfef; text-shadow:0 1px 3px #000; }
+@media(max-width:600px) { .kali-live-dock { width:auto; } }
+.os-lab-heading { grid-column:1/-1; padding:24px 0 4px; border-top:1px solid var(--border,#30384a); }
+.os-lab-heading h2 { font-size:24px; margin:0 0 8px; }
+.os-lab-heading p { color:var(--muted,#8c9ab0); font-size:13px; }
+.os-lab-filters { display:flex; gap:10px; flex-wrap:wrap; margin:20px 0; }
+.os-lab-filters button[aria-pressed="true"] { background:#367bf0; color:white; border-color:#367bf0; }
+#launch-dialog label[hidden] { display:none !important; }

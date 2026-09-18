@@ -40,3 +40,18 @@ test('missing full image fails rather than using bare Kali', async () => {
     await assert.rejects(new DockerDriver().provisionSession(session), /Full Kali image.*missing/);
   } finally { delete process.env.TEST_MISSING_IMAGE; }
 });
+test('Ubuntu selection provisions a separate Ubuntu image and hostname', async () => {
+  const offset = fs.readFileSync(log, 'utf8').length;
+  await new DockerDriver().provisionSession({ ...session, id: 'ubuntu12-session', os: 'Ubuntu' });
+  const calls = fs.readFileSync(log, 'utf8').slice(offset).trim().split('\n').map(JSON.parse);
+  const run = calls.find(args => args[0] === 'run');
+  assert.ok(run.includes('cyberrange/workstation-ubuntu:latest'));
+  assert.equal(run[run.indexOf('--hostname') + 1], 'ubuntu');
+  assert.ok(!JSON.stringify(calls).includes('rangeforge/kali-custom'));
+});
+test('missing Ubuntu image reports its own build script without falling back to Kali', async () => {
+  process.env.TEST_MISSING_IMAGE = '1';
+  try {
+    await assert.rejects(new DockerDriver().provisionSession({ ...session, os: 'Ubuntu' }), /Ubuntu image.*build-ubuntu-image.sh/);
+  } finally { delete process.env.TEST_MISSING_IMAGE; }
+});

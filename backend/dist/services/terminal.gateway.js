@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TerminalGateway = void 0;
 const session_manager_1 = require("./session.manager");
 const flag_service_1 = require("./flag.service");
+const command_policy_1 = require("./command-policy");
 class TerminalGateway {
     static instance;
     constructor() { }
@@ -38,6 +39,8 @@ class TerminalGateway {
                 if (char === '\r' || char === '\n') {
                     const command = submitted.trim();
                     submitted = '';
+                    if ((0, command_policy_1.blocksPwd)(session, command))
+                        continue;
                     if (command === session.lab.commands[0]) {
                         flag_service_1.FlagService.getInstance().completeObjective(session.id, 0);
                     }
@@ -62,7 +65,7 @@ class TerminalGateway {
         }
         catch (error) {
             console.error('[TerminalGateway] Terminal attachment failed:', error);
-            ws.send('\r\n[Error] Cannot start the real Kali terminal. Check Docker and the image build.\r\n');
+            ws.send(`\r\n[Error] Cannot start the ${session.os} terminal. Check Docker and the image build.\r\n`);
             ws.close();
         }
         ws.on('close', () => {

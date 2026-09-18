@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DevMockDriver = void 0;
 const kali_tools_sim_1 = require("./kali-tools-sim");
+const command_policy_1 = require("../services/command-policy");
 /**
  * High-Fidelity Development & Simulation Driver
  * Emulates the live container environment and interactive PTY over WebSocket,
@@ -31,6 +32,9 @@ class DevMockDriver {
         const raw = rawCommand.trim();
         // Normalize command by stripping wrappers: sudo, bash, sh, ./, /bin/, /usr/bin/
         let cmd = raw.replace(/^(sudo\s+|bash\s+|sh\s+|\.\/|\/bin\/|\/usr\/bin\/)+/i, '').trim();
+        if ((0, command_policy_1.blocksPwd)(session, cmd)) {
+            return { stdout: `${command_policy_1.PWD_BLOCKED_MESSAGE}\n`, exitCode: 126 };
+        }
         const l = session.lab;
         const isKali = session.os === 'Kali Linux';
         if (!cmd) {
