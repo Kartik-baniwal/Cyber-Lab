@@ -1,6 +1,7 @@
 import { IOrchestratorDriver } from './orchestrator.interface';
 import { LabSession, ProvisionedEnvironment, CommandResult } from '../models/types';
 import { WebSocket } from 'ws';
+import { simulateKaliTool } from './kali-tools-sim';
 
 /**
  * High-Fidelity Development & Simulation Driver
@@ -179,7 +180,7 @@ export class DevMockDriver implements IOrchestratorDriver {
       };
     }
 
-    if (cmd === 'kali-tools' || cmd.startsWith('which nmap') || cmd === 'tools') {
+    if (cmd === 'kali-tools' || cmd === 'tools') {
       return {
         stdout:
           '=== Kali Linux Pre-Installed Tools Suite ===\n' +
@@ -407,6 +408,15 @@ export class DevMockDriver implements IOrchestratorDriver {
       'ps aux': 'USER    PID   COMMAND\nroot    101   shell\nunknown 4242  suspicious-process\n',
       'kill 4242': 'Demo process 4242 stopped.\n'
     };
+
+    const kaliSim = simulateKaliTool(cmd, {
+      dynamicFlag: session.dynamicFlag,
+      os: session.os,
+      lab: session.lab
+    });
+    if (kaliSim) {
+      return kaliSim;
+    }
 
     if (responses[cmd]) {
       return { stdout: responses[cmd], exitCode: 0 };

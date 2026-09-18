@@ -7,14 +7,16 @@ import { initDimension } from "./logic/dimension";
 export default function App() {
   useEffect(() => {
     // Run vanilla JS initializers after React mounts the HTML
-    setTimeout(() => {
+    let cleanupMotion: (() => void) | undefined;
+    const startup = setTimeout(() => {
       try {
         initApp();
-        initDimension();
+        cleanupMotion = initDimension();
       } catch (err) {
         console.error("Initialization error:", err);
       }
     }, 100);
+    return () => { clearTimeout(startup); cleanupMotion?.(); };
   }, []);
   return (
     <>
@@ -32,18 +34,17 @@ export default function App() {
         <div className="ambient-orb ambient-orb-3"></div>
       </div>
 
-      <div className="app-container">
+      <div className="app-container portal-modern">
 
 
         <div className="top-beacon-bar">
           <div className="beacon-status">
             <span className="pulse-dot"></span>
-            <span>THE CYBER RANGE FOR CURIOUS MINDS</span>
+            <span>A SPACE TO BUILD YOUR CYBER SKILLS</span>
           </div>
           <div className="beacon-metrics">
-            <div className="beacon-metric">ACTIVE ENGINE: <span>DOCKER/K8S</span></div>
-            <div className="beacon-metric">LATENCY: <span>14ms</span></div>
-            <div className="beacon-metric">SANDBOXES: <span>EPHEMERAL</span></div>
+            <div className="beacon-metric"><span>KALI ROLLING</span></div>
+            <div className="beacon-metric"><span>BUILT FOR HANDS-ON LEARNING</span></div>
           </div>
         </div>
 
@@ -71,12 +72,9 @@ export default function App() {
 
             <nav>
               <ul className="nav-links" id="nav-links">
-                <li><a href="#overview" className="nav-link">Overview</a></li>
-                <li><a href="#terminal-demo" className="nav-link">Terminal</a></li>
                 <li><a href="#labs" className="nav-link">Labs</a></li>
-                <li><a href="/RangeForge-Project/" className="nav-link" style={{color: 'var(--cyan)'}}>Cyber Lab Dashboard ↗</a></li>
-                <li><a href="#architecture" className="nav-link">Architecture</a></li>
-                <li><a href="#audit" className="nav-link">Audit</a></li>
+                <li><a href="#terminal-demo" className="nav-link">The workspace</a></li>
+                <li><a href="#overview" className="nav-link">How it works</a></li>
                 <li><a href="#docs" className="nav-link">Docs</a></li>
               </ul>
             </nav>
@@ -84,7 +82,7 @@ export default function App() {
             <div className="nav-actions">
 
               <div className="auth-nav-group" id="auth-nav-group">
-                <a href="/RangeForge-Project/" className="nav-btn-login" id="btn-nav-login" title="Operator Log In" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                <a href="/RangeForge-Project/" className="nav-btn-login" id="btn-nav-login" title="Operator Log In">
                   Log In
                 </a>
                 <button className="nav-btn-signup" id="btn-nav-signup" title="Create Operator Account">
@@ -133,18 +131,18 @@ export default function App() {
             <div className="container">
               <div className="hero-layout">
                 <div className="hero-copy">
-                  <div className="hero-pill-badge"><span className="pulse-dot"></span> ENTER THE NEXT DIMENSION OF CYBER TRAINING</div>
-                  <h1 className="hero-title">Train beyond<br />the ordinary.<br /><span>Enter the forge.</span></h1>
-                  <p className="hero-description">Real-world cybersecurity starts with hands-on practice. Explore isolated labs, sharpen your instincts, and turn curiosity into capability.</p>
+                  <div className="hero-pill-badge"><span className="pulse-dot"></span> THE CYBER LAB, REIMAGINED <span className="hero-badge-arrow">↗</span></div>
+                  <h1 className="hero-title">Build skills.<br />Break limits.<br /><span>Stay curious.</span></h1>
+                  <p className="hero-description">Your next breakthrough starts with a command. Explore hands-on security labs, experiment in Kali Linux, and build the confidence to take on real challenges.</p>
                   <div className="hero-cta-group">
-                    <a href="#labs" className="btn btn-primary btn-lg">Explore the labs <span aria-hidden="true">↗</span></a>
-                    <a href="#terminal-demo" className="btn btn-secondary btn-lg"><span aria-hidden="true">&gt;_</span> Try the terminal</a>
+                    <a href="/RangeForge-Project/" className="btn btn-primary btn-lg">Enter the lab <span aria-hidden="true">↗</span></a>
+                    <a href="#labs" className="btn btn-secondary btn-lg">Explore challenges <span aria-hidden="true">↓</span></a>
                   </div>
-                  <div className="hero-footnote"><span>✓ Browser-based</span><span>✓ Isolated environments</span><span>✓ Zero setup</span></div>
+                  <div className="hero-footnote"><span>Browser workspace</span><i aria-hidden="true"/><span>Real Kali tools</span><i aria-hidden="true"/><span>Learn by doing</span></div>
                 </div>
                 <div className="dimension-scene" aria-label="Animated three-dimensional Cyber Lab security core">
                   <div className="scene-stars" aria-hidden="true"></div>
-                  <div className="scene-coordinate coord-top">CL // SANDBOX CORE <span>001</span></div>
+                  <div className="scene-coordinate coord-top">CYBER LAB / EXPLORATION CORE <span>01 — 07</span></div>
                   <div className="scene-rotation" aria-hidden="true">
                     <div className="orbital-system">
                       <div className="orbit orbit-a"></div><div className="orbit orbit-b"></div><div className="orbit orbit-c"></div>
@@ -159,17 +157,17 @@ export default function App() {
                     </div>
                     <div className="core-platform platform-one"></div><div className="core-platform platform-two"></div><div className="core-platform platform-three"></div>
                   </div>
-                  <div className="holo-chip chip-left"><span className="holo-icon">⌘</span><div><small>ENVIRONMENT</small><strong>Fully isolated</strong></div><i></i></div>
-                  <div className="holo-chip chip-right"><span className="holo-icon">✧</span><div><small>BUILT TO EXPLORE</small><strong>50+ security tools</strong></div></div>
-                  <div className="holo-terminal"><div className="holo-terminal-head"><span><i></i><i></i><i></i></span><span>TERMINAL PREVIEW</span><span>↗</span></div><p><em>root@cyberlab</em> ~ $ init sandbox</p><p className="holo-success">✓ Environment ready. Your move.<b>▍</b></p></div>
+                  <div className="holo-chip chip-left"><span className="holo-icon">⌘</span><div><small>YOUR WORKSTATION</small><strong>4 vCPU · 3.5 GB</strong></div><i></i></div>
+                  <div className="holo-chip chip-right"><span className="holo-icon">↗</span><div><small>FIND YOUR NEXT CHALLENGE</small><strong>7 paths to explore</strong></div></div>
+                  <div className="holo-terminal"><div className="holo-terminal-head"><span><i></i><i></i><i></i></span><span>WORKSPACE PREVIEW</span><span>↗</span></div><p><em>root@kali</em> ~ # cat /etc/os-release</p><p className="holo-success">Kali GNU/Linux Rolling <b>▍</b></p></div>
                   <div className="scene-coordinate coord-bottom"><span>TRAIN / ATTACK / DEFEND</span><button id="motion-toggle" type="button" aria-pressed="false">Pause motion Ⅱ</button></div>
                 </div>
               </div>
               <div className="hero-stats-row">
-                <div className="hero-stat-card"><div className="hero-stat-val">07<span> labs</span></div><div className="hero-stat-label">Real challenges. Practical skills.</div></div>
-                <div className="hero-stat-card"><div className="hero-stat-val">50+<span> tools</span></div><div className="hero-stat-label">Your security toolkit, ready to go.</div></div>
-                <div className="hero-stat-card"><div className="hero-stat-val">100%<span> browser</span></div><div className="hero-stat-label">Your workspace. Anywhere.</div></div>
-                <div className="hero-stat-card"><div className="hero-stat-val">Zero<span> setup</span></div><div className="hero-stat-label">Less configuring. More discovering.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">07<span> practice labs</span></div><div className="hero-stat-label">A new challenge at every level.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">Kali<span> Rolling</span></div><div className="hero-stat-label">The tools you came here to learn.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">4<span> vCPU per lab</span></div><div className="hero-stat-label">Room to run your experiments.</div></div>
+                <div className="hero-stat-card"><div className="hero-stat-val">Your<span> own pace</span></div><div className="hero-stat-label">Start small. Keep going.</div></div>
               </div>
             </div>
           </section>
@@ -181,13 +179,18 @@ export default function App() {
                 <div className="section-badge purple">
                   <span>01 / BUILT FOR PRACTICE</span>
                 </div>
-                <h2 className="section-title">Less friction. More field experience.</h2>
+                <h2 className="section-title">A little curiosity goes a long way.</h2>
                 <p className="section-desc">
-                  Traditional cyber ranges suffer from heavy VM setup costs, shared contaminated environments, and lost work. Cyber Lab solves this with instant, zero-persistence Docker containers.
+                  Choose a challenge, open your workspace, and start exploring. You bring the questions. The lab gives you room to find the answers.
                 </p>
               </div>
 
-              <div className="problem-solution-grid">
+              <div className="modern-learning-grid">
+                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">⌘</span><span>01 / CHOOSE</span></div><h3>Find your starting point.</h3><p>Get comfortable with Linux, explore network security, or dive into the Kali toolkit. Pick the challenge that meets you where you are.</p><a href="#labs">Explore the collection <span>↗</span></a></article>
+                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">&gt;_</span><span>02 / EXPERIMENT</span></div><h3>Make the terminal yours.</h3><p>Work through clear objectives in your own lab session. Run commands, follow the clues, and see what happens when you try something new.</p><a href="#terminal-demo">Try a practice command <span>↗</span></a></article>
+                <article className="modern-learning-card spatial-card"><div className="learning-top"><span className="learning-glyph">↗</span><span>03 / GROW</span></div><h3>Turn practice into progress.</h3><p>Capture flags, review your session, and save useful discoveries. Every solved problem is another skill you can build on.</p><a href="/RangeForge-Project/">Open your workspace <span>↗</span></a></article>
+              </div>
+              <div className="problem-solution-grid" hidden>
 
                 <div className="comparison-box legacy tilt-card">
                   <div className="box-tag red">Traditional Cyber Labs</div>
@@ -283,12 +286,11 @@ export default function App() {
                     <span className="t-dot red"></span>
                     <span className="t-dot yellow"></span>
                     <span className="t-dot green"></span>
-                    <span className="terminal-title-pill">&gt;_ root@kali: ~ (xterm.js v5 · PTY Stream)</span>
+                    <span className="terminal-title-pill">&gt;_ An introduction to the terminal</span>
                   </div>
                   <div className="terminal-session-telemetry">
-                    <div className="telemetry-item">SESSION: <span>rf-9f82d1c0</span></div>
-                    <div className="telemetry-item">STATUS: <span>ACTIVE</span></div>
-                    <div className="telemetry-item">WS: <span>CONNECTED</span></div>
+                    <div className="telemetry-item"><span>INTERACTIVE DEMO</span></div>
+                    <a className="terminal-live-link" href="/RangeForge-Project/">Open a real lab ↗</a>
                   </div>
                 </div>
 
@@ -309,8 +311,8 @@ export default function App() {
                 <div className="terminal-screen" id="terminal-screen">
                   <div className="terminal-output" id="terminal-output">
 
-                    <div className="term-line cyan">Cyber Lab Terminal Gateway v2.9.0 [Container: kali-sandbox-session-9f82]</div>
-                    <div className="term-line muted">Linux kali-rolling 6.6.15-amd64 #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux</div>
+                    <div className="term-line cyan">Welcome to your first experiment.</div>
+                    <div className="term-line muted">This is a practice preview. Launch a lab for the real Kali terminal.</div>
                     <div className="term-line green">Type 'help' to display available sandbox commands or click any command pill above.</div>
                     <div className="term-line muted">--------------------------------------------------------------------------------</div>
                   </div>
@@ -883,8 +885,8 @@ Generated by Cyber Lab v2.9.0 Audit System · All rights reserved.</pre>
                 <div className="deploy-code-box">
                   <button className="btn-copy-code" id="btn-copy-deploy">Copy Commands</button>
                   <pre style={{fontFamily: 'var(--font-mono)', fontSize: '13px', lineHeight: '1.7', color: '#c6d4dc'}} id="deploy-code-text"># Option B: Full Containerized Stack (Traefik + Postgres + Redis + API)
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 docker compose up -d
 
 # Services will bind automatically:
@@ -1017,11 +1019,11 @@ docker compose up -d
 
             <div className="quickstart-code-wrapper">
               <button className="btn-copy-code" id="btn-copy-cta">Copy</button>
-              <code>git clone https://github.com/Kartik-baniwal/Range_Forge.git &amp;&amp; cd Range_Forge &amp;&amp; npm start</code>
+              <code>git clone https://github.com/Kartik-baniwal/Cyber-Lab.git &amp;&amp; cd Cyber-Lab &amp;&amp; npm start</code>
             </div>
 
             <div style={{display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap'}}>
-              <a href="https://github.com/Kartik-baniwal/Range_Forge" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">
+              <a href="https://github.com/Kartik-baniwal/Cyber-Lab" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg">
                 <span>⭐ Star on GitHub</span>
               </a>
               <button className="btn btn-secondary btn-lg" id="btn-cta-deck">
@@ -1084,7 +1086,7 @@ docker compose up -d
               <li><a href="#docs" className="footer-link">Documentation</a></li>
               <li><a href="#docs" className="footer-link">API Reference</a></li>
               <li><a href="#docs" className="footer-link">Deployment Guide</a></li>
-              <li><a href="https://github.com/Kartik-baniwal/Range_Forge" target="_blank" className="footer-link">GitHub Repository</a></li>
+              <li><a href="https://github.com/Kartik-baniwal/Cyber-Lab" target="_blank" className="footer-link">GitHub Repository</a></li>
               <li><a href="#hero" id="footer-deck-link" className="footer-link">Presentation Slides</a></li>
             </ul>
           </div>

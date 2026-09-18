@@ -84,21 +84,9 @@ export class SessionManager {
       console.log(`[SessionManager] Session ${sessionId} is now ACTIVE.`);
       return session;
     } catch (err) {
-      console.warn(`[SessionManager] Primary driver provisioning failed for session ${sessionId}. Falling back to DevMockDriver...`);
-      try {
-        const { DevMockDriver } = await import('../drivers/dev-mock.driver');
-        this.driver = new DevMockDriver();
-        const env = await this.driver.provisionSession(session);
-        session.namespaceOrNetworkId = env.networkId;
-        session.endpoints = env.endpoints;
-        session.status = 'active';
-        console.log(`[SessionManager] Session ${sessionId} is now ACTIVE via fallback DevMockDriver.`);
-        return session;
-      } catch (fallbackErr) {
-        session.status = 'failed';
-        console.error(`[SessionManager] Provisioning completely failed for session ${sessionId}:`, fallbackErr);
-        throw fallbackErr;
-      }
+      session.status = 'failed';
+      console.error(`[SessionManager] Provisioning failed for ${sessionId}:`, err);
+      throw err;
     }
   }
 

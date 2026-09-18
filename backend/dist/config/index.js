@@ -12,7 +12,7 @@ exports.config = {
     env: process.env.NODE_ENV || 'development',
     hmacSecret: process.env.HMAC_SECRET || 'cyberrange-super-secret-key-change-in-production',
     sessionTtlMinutes: parseInt(process.env.SESSION_TTL_MINUTES || '60', 10),
-    orchestratorType: (process.env.ORCHESTRATOR_TYPE || 'dev-mock'),
+    orchestratorType: (process.env.ORCHESTRATOR_TYPE || 'docker'),
     corsOrigin: process.env.CORS_ORIGIN || '*',
     databaseUrl: process.env.DATABASE_URL || 'postgresql://cyberrange:secret@localhost:5432/cyberrange_db',
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6379'

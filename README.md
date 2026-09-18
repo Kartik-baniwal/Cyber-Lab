@@ -64,3 +64,24 @@ cyberrange-prototype/
 ├── containers/           # Target container definitions (Kali, Ubuntu, Web, DVWA)
 └── k8s/                  # Kubernetes Helm & manifest deployment.
 ```
+
+## Full Kali lab
+
+Start Docker, then run `bash scripts/build-kali-image.sh` to build the official
+`kalilinux/kali-rolling:latest` with `kali-linux-default` and XFCE. The build
+pulls a fresh base and upgrades Rolling packages each time. This is a large image;
+allow substantial disk space and download time. Build failures stop the process.
+
+Run `npm --prefix backend run build`, then `ORCHESTRATOR_TYPE=docker npm start`.
+End the old lab session and launch a new Kali lab after rebuilding. Real mode
+requires the built image and never falls back to simulated output or bare Kali.
+`KALI_IMAGE` can override the image tag. Explicit `ORCHESTRATOR_TYPE=dev-mock`
+is still available for demos only.
+
+The terminal runs a persistent Linux PTY: sudo, ifconfig, interactive tools, and
+shell state execute inside Kali. `ipconfig` is a Windows command; use `ip addr`
+or `ifconfig` in Kali. Docker shares its host kernel and does not provide a Kali
+VM kernel or direct Wi-Fi hardware access. The existing web desktop UI is still
+simulated; installing XFCE in the image does not connect that UI to a VNC server.
+
+Each Docker lab is limited to **4 vCPU · 3.5 GB RAM** (`--cpus 4 --memory 3584m --memory-swap 3584m`). Allocate at least 4 GB total memory to Docker so the host and lab have sufficient room.

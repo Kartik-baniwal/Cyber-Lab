@@ -29,6 +29,7 @@
   </script>
 
   <link rel="stylesheet" href="style.css?v=2.9">
+  <link rel="stylesheet" href="modern-workspace.css?v=3.0">
   
   <!-- xterm.js Terminal Emulator for Real PTY Stream -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
@@ -58,8 +59,8 @@
     <div class="team">
       <span class="teamicon">CL</span>
       <div>
-        <strong>CyberLab Pro</strong>
-        <small>Community Tier</small>
+        <strong>Personal workspace</strong>
+        <small>Build your security skills</small>
       </div>
     </div>
     <div class="navlabel">NAVIGATION</div>
@@ -82,11 +83,11 @@
     <div class="sidebottom">
       <div class="practice">
         <div class="practice-header">
-          <span class="practice-badge">TARGET HUD</span>
-          <span class="practice-icon">⚡</span>
+          <span class="practice-badge">LEARN BY DOING</span>
+          <span class="practice-icon">↗</span>
         </div>
-        <strong>Hands-on Labs</strong>
-        <p>Real targets. Isolated environments. Zero risk.</p>
+        <strong>Your next skill starts here.</strong>
+        <p>Explore a lab, follow the evidence, and capture the flag.</p>
         <div class="tinyline"></div>
       </div>
       <div class="profile" id="profile-card">
@@ -143,7 +144,7 @@
         <span class="footer-sep">·</span>
         <span>TRAIN. ATTACK. DEFEND</span>
       </div>
-      <span id="footer-status">Container Orchestration: Ready · Real-time PTY & KasmVNC active</span>
+      <span id="footer-status">Checking backend connection…</span>
     </footer>
   </div>
 
@@ -156,9 +157,9 @@
       </div>
       <form method="dialog"><button class="close" aria-label="Close dialog">×</button></form>
     </div>
-    <div class="eyebrow">INSTANCE PROVISIONING</div>
+    <div class="eyebrow">YOUR NEXT CHALLENGE</div>
     <h2 id="launch-title">Launch environment</h2>
-    <p class="muted">Select your workstation image. Isolated target networks and flags are auto-configured.</p>
+    <p class="muted">Choose your workstation. Your lab environment and objectives will be ready when you launch.</p>
     <fieldset>
       <legend>Target Workstation OS</legend>
       <label class="oschoice">
@@ -166,7 +167,7 @@
         <div class="oschoice-content">
           <span class="osicon kali">K</span>
           <div>
-            <strong>Kali Linux 2024</strong>
+            <strong>Kali Linux Rolling</strong>
             <small>Preloaded with nmap, hydra, curl, metasploit</small>
           </div>
         </div>
@@ -187,18 +188,18 @@
     <div class="launchspec">
       <div class="spec-item">
         <span class="spec-label">COMPUTE</span>
-        <span class="spec-val">2 vCPU · 4 GB RAM</span>
+        <span class="spec-val">4 vCPU · 3.5 GB RAM</span>
       </div>
       <div class="spec-item">
-        <span class="spec-label">TTL LEASE</span>
+        <span class="spec-label">SESSION</span>
         <span class="spec-val">60 min auto-recycle</span>
       </div>
       <div class="spec-item">
         <span class="spec-label">NETWORKING</span>
-        <span class="spec-val">Dual VLAN Bridge</span>
+        <span class="spec-val">Isolated lab network</span>
       </div>
     </div>
-    <p class="demohint" id="launch-notice">Ephemeral sandbox: Zero persistence, clean slate on teardown with dynamic flag injection.</p>
+    <p class="demohint" id="launch-notice">A fresh workspace for each session. Export your notes and command history before ending the lab.</p>
     <button class="primary full" id="confirm-launch">Launch session <span class="btn-arrow">→</span></button>
   </dialog>
 
@@ -304,7 +305,7 @@
       <div class="settings-field">
         <label for="setting-default-os">Default Lab Image</label>
         <select id="setting-default-os">
-          <option value="Kali Linux" selected>Kali Linux 2024</option>
+          <option value="Kali Linux" selected>Kali Linux Rolling</option>
           <option value="Ubuntu">Ubuntu 22.04 LTS</option>
         </select>
       </div>
@@ -326,6 +327,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=2.9"></script>
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>

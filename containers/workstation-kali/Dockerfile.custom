@@ -5,38 +5,26 @@ FROM kalilinux/kali-rolling:latest
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TERM=xterm-256color
 
-# 1. Update Kali repositories and install essential networking, recon, and offensive tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash \
-    sudo \
-    curl \
-    wget \
-    git \
-    vim \
-    nano \
-    procps \
-    ca-certificates \
-    net-tools \
-    iproute2 \
-    iputils-ping \
-    traceroute \
-    dnsutils \
-    whois \
-    nmap \
-    masscan \
-    sqlmap \
-    hydra \
-    john \
-    tcpdump \
-    tshark \
-    socat \
-    netcat-traditional \
-    gobuster \
-    dirb \
-    exploitdb \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+# Bootstrap HTTPS and retry transient mirror failures.
+RUN printf 'Acquire::Retries "5";\n' > /etc/apt/apt.conf.d/80retries && \
+    apt-get update && apt-get install -y ca-certificates && \
+    find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+      -exec sed -i 's|http://http.kali.org/kali|https://kali.download/kali|g' {} + && \
+    rm -f /etc/apt/apt.conf.d/docker-clean
+
+# Refresh Rolling and install the standard Kali toolset, including GUI tools.
+# Keep recommends: the full distribution depends on them for its tool collections.
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update && apt-get -y full-upgrade && \
+    apt-get install -y kali-linux-default kali-desktop-xfce \
+      metasploit-framework nmap wireshark burpsuite sqlmap hydra john hashcat \
+      aircrack-ng gobuster seclists wordlists exploitdb \
+      sudo net-tools iproute2 iputils-ping dnsutils python3 util-linux && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Report installed packages rather than a simulated tool inventory.
+RUN printf '#!/bin/sh\ndpkg-query -W kali-linux-default kali-desktop-xfce\ncommand -v nmap msfconsole sqlmap hydra john wireshark gobuster\n' > /usr/local/bin/kali-tools && \
+    chmod +x /usr/local/bin/kali-tools
 
 # 2. Setup root environment and learner user
 RUN mkdir -p /root/lab /root/wordlists /root/exploits && \

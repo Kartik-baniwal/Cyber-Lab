@@ -1,4 +1,4 @@
-# RangeForge — Complete Project Documentation
+# Cyber Lab — Complete Project Documentation
 
 > **Version:** 2.9.0 · **Author:** Kartik Baniwal · **License:** MIT
 
@@ -21,14 +21,14 @@
 13. [Save Terminal Progress Feature](#13-save-terminal-progress-feature)
 14. [Themes & UI System](#14-themes--ui-system)
 15. [Deployment Guide](#15-deployment-guide)
-16. [Environment Variables](#16-environment-variables)
+16: [Environment Variables](#16-environment-variables)
 17. [Security Considerations](#17-security-considerations)
 
 ---
 
 ## 1. Project Overview
 
-**RangeForge** is an enterprise-grade cybersecurity training platform that provides realistic, isolated lab environments for hands-on security training. It combines a rich browser-based UI with live Docker container orchestration, PTY terminal streaming, and a simulated Kali Linux desktop — all accessible from a single browser tab.
+**Cyber Lab** is an enterprise-grade cybersecurity training platform that provides realistic, isolated lab environments for hands-on security training. It combines a rich browser-based UI with live Docker container orchestration, PTY terminal streaming, and a simulated Kali Linux desktop — all accessible from a single browser tab.
 
 ### Key Capabilities
 
@@ -43,7 +43,7 @@
 | Auth Gate | User login/register with localStorage-persisted profile |
 | Dual Theme | Obsidian (dark) and Daylight (light) theme with CSS variable system |
 | Multi-Driver | Docker, Kubernetes, and Dev-Mock orchestration drivers |
-| Docker Compose | Full stack: Traefik + PostgreSQL + Redis + RangeForge API |
+| Docker Compose | Full stack: Traefik + PostgreSQL + Redis + Cyber Lab API |
 
 ---
 
@@ -162,7 +162,7 @@ cyberrange-prototype/
 
 ## 5. Lab Catalog
 
-RangeForge ships with **7 built-in labs** across 5 security domains:
+Cyber Lab ships with **7 built-in labs** across 5 security domains:
 
 | ID | Name | Category | Level | Time | OS |
 |---|---|---|---|---|---|
@@ -454,8 +454,8 @@ The Desktop tab renders a fully interactive simulated Kali XFCE environment:
 ### Option A: Local Development
 
 ```bash
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 cd backend && npm install && npm run build && cd ..
 npm start
 # -> Open http://localhost:3001
@@ -466,7 +466,7 @@ npm start
 ```bash
 docker compose up -d
 # Traefik: port 80/8080
-# RangeForge API: port 3001
+# Cyber Lab API: port 3001
 # PostgreSQL: port 5432
 # Redis: port 6379
 
@@ -526,4 +526,4 @@ Each session gets a unique flag: `HMAC-SHA256(sessionId + labId, HMAC_SECRET)` �
 
 ---
 
-*RangeForge v2.9.0 — Train. Attack. Defend. — September 2026*
+*Cyber Lab v2.9.0 — Train. Attack. Defend. — September 2026*

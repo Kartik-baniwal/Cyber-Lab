@@ -422,7 +422,7 @@ export const PRESENTATION_SLIDES = [
           Cyber Lab provides everything you need to level up your cybersecurity capabilities — from foundational Linux mastery to advanced incident response.
         </p>
         <div style="font-family:var(--font-mono); font-size:13px; background:rgba(0,240,255,0.08); border:1px solid var(--surface-border); border-radius:6px; padding:12px; color:var(--cyan); margin-bottom:16px;">
-          git clone https://github.com/Kartik-baniwal/Range_Forge.git
+          git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
         </div>
         <p style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted);">
           Kartik Baniwal · kartik@cyberlab.io · MIT License · v2.9.0
@@ -435,8 +435,8 @@ export const PRESENTATION_SLIDES = [
 // Deployment Code Snippets
 export const DEPLOY_SNIPPETS = {
   'dep-docker': `# Option B: Full Containerized Stack (Traefik + Postgres + Redis + API)
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 docker compose up -d
 
 # Services will bind automatically:
@@ -446,24 +446,24 @@ docker compose up -d
 # - Redis Cache:       localhost:6379`,
 
   'dep-local': `# Option A: Local Development (Dev-Mock Driver — No Docker Required)
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 cd backend && npm install && npm run build && cd ..
 npm start
 
 # -> Open http://localhost:3001 in your browser`,
 
   'dep-lan': `# Option C: LAN Wi-Fi Sharing (Perfect for Classroom / Team Exercises)
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 npm start
 
 # Access from any student laptop on same Wi-Fi:
 # -> http://<your-local-ip>:3001 (e.g. http://192.168.1.150:3001)`,
 
   'dep-k8s': `# Option D: Kubernetes Production Cluster Scale-Out
-git clone https://github.com/Kartik-baniwal/Range_Forge.git
-cd Range_Forge
+git clone https://github.com/Kartik-baniwal/Cyber-Lab.git
+cd Cyber-Lab
 kubectl create namespace cyberrange
 kubectl apply -f k8s/ -n cyberrange
 kubectl get pods -n cyberrange -w`

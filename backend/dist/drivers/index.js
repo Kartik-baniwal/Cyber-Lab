@@ -42,7 +42,6 @@ function getOrchestratorDriver() {
         console.log('[Orchestrator] Active Docker daemon confirmed — initializing real DockerDriver.');
         return new docker_driver_1.DockerDriver();
     }
-    console.log('[Orchestrator] Docker daemon unavailable or not running — falling back to internal DevMockDriver.');
-    return new dev_mock_driver_1.DevMockDriver();
+    throw new Error('Docker is unavailable. Start Docker and build the full Kali image.');
 }
 __exportStar(require("./orchestrator.interface"), exports);

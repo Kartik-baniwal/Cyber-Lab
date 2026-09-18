@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DevMockDriver = void 0;
+const kali_tools_sim_1 = require("./kali-tools-sim");
 /**
  * High-Fidelity Development & Simulation Driver
  * Emulates the live container environment and interactive PTY over WebSocket,
@@ -162,7 +163,7 @@ class DevMockDriver {
                 exitCode: 0
             };
         }
-        if (cmd === 'kali-tools' || cmd.startsWith('which nmap') || cmd === 'tools') {
+        if (cmd === 'kali-tools' || cmd === 'tools') {
             return {
                 stdout: '=== Kali Linux Pre-Installed Tools Suite ===\n' +
                     '[+] Reconnaissance:    nmap, masscan, fping, netdiscover, amass, enum4linux\n' +
@@ -369,6 +370,14 @@ class DevMockDriver {
             'ps aux': 'USER    PID   COMMAND\nroot    101   shell\nunknown 4242  suspicious-process\n',
             'kill 4242': 'Demo process 4242 stopped.\n'
         };
+        const kaliSim = (0, kali_tools_sim_1.simulateKaliTool)(cmd, {
+            dynamicFlag: session.dynamicFlag,
+            os: session.os,
+            lab: session.lab
+        });
+        if (kaliSim) {
+            return kaliSim;
+        }
         if (responses[cmd]) {
             return { stdout: responses[cmd], exitCode: 0 };
         }

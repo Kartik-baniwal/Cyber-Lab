@@ -591,7 +591,7 @@ function initDocsAndAPI() {
 
   // Copy CTA Code
   document.getElementById('btn-copy-cta')?.addEventListener('click', () => {
-    copyToClipboard('git clone https://github.com/Kartik-baniwal/Range_Forge.git && cd Range_Forge && npm start');
+    copyToClipboard('git clone https://github.com/Kartik-baniwal/Cyber-Lab.git && cd Cyber-Lab && npm start');
     showToast('📋 Quickstart command copied!', '✓');
   });
 

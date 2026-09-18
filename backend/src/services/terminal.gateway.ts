@@ -35,24 +35,37 @@ export class TerminalGateway {
 
     console.log(`[TerminalGateway] Client connected to terminal for session: ${sessionId}`);
 
-    // Track command completion for objectives
-    const originalExecute = sessionManager.getDriver().executeCommand.bind(sessionManager.getDriver());
-    sessionManager.getDriver().executeCommand = async (s, cmd) => {
-      const result = await originalExecute(s, cmd);
-      const cleanCmd = cmd.trim();
-
-      // Automatically mark objectives done if matched
-      if (cleanCmd === s.lab.commands[0]) {
-        FlagService.getInstance().completeObjective(s.id, 0);
-      } else if (cleanCmd === s.lab.commands[1] && s.completedObjectives.includes(0)) {
-        FlagService.getInstance().completeObjective(s.id, 1);
+    // Observe submitted objective commands without replacing the driver's executor.
+    // All bytes still go directly to the persistent PTY.
+    let submitted = '';
+    ws.on('message', (data) => {
+      for (const char of data.toString()) {
+        if (char === '\r' || char === '\n') {
+          const command = submitted.trim();
+          submitted = '';
+          if (command === session!.lab.commands[0]) {
+            FlagService.getInstance().completeObjective(session!.id, 0);
+          } else if (command === session!.lab.commands[1] && session!.completedObjectives.includes(0)) {
+            FlagService.getInstance().completeObjective(session!.id, 1);
+          }
+        } else if (char === '\x7f' || char === '\b') {
+          submitted = submitted.slice(0, -1);
+        } else if (char === '\x03' || char === '\x15') {
+          submitted = '';
+        } else if (char >= ' ' && submitted.length < 8192) {
+          submitted += char;
+        }
       }
-
-      return result;
-    };
+    });
 
     // Attach driver's PTY / socket handler
-    sessionManager.getDriver().attachTerminal(session, ws);
+    try {
+      await sessionManager.getDriver().attachTerminal(session, ws);
+    } catch (error) {
+      console.error('[TerminalGateway] Terminal attachment failed:', error);
+      ws.send('\r\n[Error] Cannot start the real Kali terminal. Check Docker and the image build.\r\n');
+      ws.close();
+    }
 
     ws.on('close', () => {
       console.log(`[TerminalGateway] Client disconnected from terminal for session: ${sessionId}`);

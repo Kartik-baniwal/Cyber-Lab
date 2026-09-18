@@ -1,0 +1,282 @@
+/* Shared visual direction: ink, electric blue, and quiet dimensional surfaces. */
+:root {
+  --bg-primary:#070b14; --bg-secondary:#0b111e; --bg-tertiary:#111e32;
+  --surface:#0d1422; --surface-hover:#142137; --surface-border:#233149;
+  --surface-border-strong:#3a5071; --glass-bg:#0a101ddb;
+  --cyan:#72a5ff; --cyan-dim:#4b8dff12; --cyan-glow:#4b8dff26;
+  --blue:#4b8dff; --green:#66d8bd; --purple:#8d9cff;
+  --text-primary:#f2f5fc; --text-secondary:#abb8ce; --text-muted:#8798b2; --text-dim:#788aa5;
+  --spatial-glow:#4b8dff; --spatial-cool:#87b9ff;
+}
+[data-theme="daylight"] {
+  --bg-primary:#f4f7fc; --bg-secondary:#eaf0f9; --bg-tertiary:#e0eafb;
+  --surface:#ffffff; --surface-hover:#edf3fe; --surface-border:#d6e0ee;
+  --surface-border-strong:#a3b7d1; --glass-bg:#f7faffeb;
+  --text-primary:#13213a; --text-secondary:#4b607e; --text-muted:#61738d; --text-dim:#687b94;
+  --cyan:#2765cf; --cyan-dim:#4b8dff0d; --blue:#2f70e5;
+}
+html {scroll-padding-top:100px;}
+body {background:var(--bg-primary);}
+::selection {background:#4b8dff;color:white;}
+.cyber-background {background:radial-gradient(ellipse at 78% 9%,#2361cb12,transparent 45%);}
+.cyber-background::after {background-image:radial-gradient(#7b9dcb55 .65px,transparent .65px);background-size:32px 32px;opacity:.12;}
+.portal-modern {overflow:clip;}
+.portal-modern .container {width:100%;max-width:1248px;padding-inline:40px;}
+.portal-modern [hidden] {display:none!important;}
+.portal-modern .top-beacon-bar {display:flex;min-height:32px;padding:0 max(40px,calc((100vw - 1168px)/2));background:#0a1120;border-bottom:1px solid #1c293c;color:#8399ba;font:9px var(--font-mono);letter-spacing:1px;justify-content:space-between;}
+.portal-modern .beacon-status,.portal-modern .beacon-metrics {display:flex;align-items:center;gap:22px;}
+.portal-modern .beacon-status {gap:9px;}
+.portal-modern .beacon-metric span {color:#9fb4d2;}
+.portal-modern .header-nav {height:84px;background:var(--glass-bg);backdrop-filter:blur(22px);border-bottom:1px solid var(--surface-border);box-shadow:none;}
+.portal-modern .nav-inner {height:100%;gap:28px;}
+.portal-modern .logo-brand {gap:10px;}
+.portal-modern .logo-icon {width:38px;height:40px;border:1px solid #729cdd70;border-radius:11px;background:linear-gradient(140deg,#2366cb45,#0b1c39);box-shadow:inset 0 1px #ffffff25;}
+.portal-modern .logo-title {font-size:23px;letter-spacing:-1px;color:var(--text-primary);}
+.portal-modern .logo-title-accent {color:var(--text-primary);}
+.portal-modern .logo-tag {font-size:7px;color:var(--text-muted);letter-spacing:2px;}
+.portal-modern .nav-links {gap:24px;}
+.portal-modern .nav-link {font-size:12px;font-weight:500;color:var(--text-secondary);}
+.portal-modern .nav-link:hover {color:var(--text-primary);}
+.portal-modern .nav-actions {gap:18px;}
+.portal-modern .nav-btn-login {display:inline-flex;align-items:center;text-decoration:none;font-size:12px;color:var(--text-secondary);}
+.portal-modern .theme-toggle-btn {border:1px solid var(--surface-border);background:var(--surface);box-shadow:none;}
+.portal-modern .nav-btn-signup {padding:11px 16px;border-radius:8px;font-size:12px;}
+.portal-modern .btn,.portal-modern .nav-btn-signup {transition:background .2s,border-color .2s,box-shadow .2s;}
+.portal-modern .btn {font-size:13px;border-radius:10px;}
+.portal-modern .btn-primary,.portal-modern .btn-green,.portal-modern .nav-btn-signup {
+  background:linear-gradient(180deg,#4d91ff,#3675e9);border:1px solid #73a4ff;color:white;
+  box-shadow:inset 0 1px 0 #ffffff25,0 6px 18px #1459d523!important;
+}
+.portal-modern .btn-primary:hover,.portal-modern .btn-green:hover,.portal-modern .nav-btn-signup:hover {background:linear-gradient(180deg,#68a1ff,#4b88f2);color:white;box-shadow:0 8px 28px #2363d23b!important;}
+.portal-modern .btn-secondary,.portal-modern .btn-outline {background:var(--surface);border:1px solid var(--surface-border-strong);color:var(--text-primary);box-shadow:inset 0 1px #ffffff06!important;}
+.portal-modern .btn-secondary:hover,.portal-modern .btn-outline:hover {border-color:var(--cyan);background:var(--surface-hover);}
+.portal-modern .hero-section {padding:68px 0 0;background:radial-gradient(ellipse at 85% 36%,#2465d214,transparent 57%);overflow:visible;}
+.portal-modern .hero-layout {grid-template-columns:1fr 1fr;gap:22px;min-height:560px;align-items:center;}
+.portal-modern .hero-copy {position:relative;z-index:6;}
+.portal-modern .hero-pill-badge {display:inline-flex;gap:10px;align-items:center;padding:8px 11px;border:1px solid #4b8dff38;border-radius:7px;background:#4b8dff09;color:var(--cyan);font:9px var(--font-mono);letter-spacing:1px;margin:0 0 26px;}
+.portal-modern .hero-badge-arrow {border-left:1px solid #4b8dff40;padding-left:10px;font-size:14px;}
+.portal-modern .pulse-dot {background:#71a7ff;box-shadow:0 0 9px #4b8dff66;}
+.portal-modern .hero-title {font-size:clamp(49px,5.7vw,78px);font-weight:650;letter-spacing:-4.8px;line-height:1.08;margin:0 0 25px;text-shadow:none;}
+.portal-modern .hero-title>span {background:linear-gradient(115deg,#c3dbff 0%,#79adff 45%,#4a87ed 100%);background-clip:text;-webkit-text-fill-color:transparent;filter:none;}
+.portal-modern .hero-description {font-size:15px;line-height:1.9;max-width:465px;color:var(--text-secondary);margin-bottom:27px;}
+.portal-modern .hero-cta-group {gap:12px;}
+.portal-modern .btn-lg {padding:16px 21px;font-size:13px;gap:20px;}
+.portal-modern .hero-footnote {display:flex;align-items:center;gap:13px;font-size:10px;margin-top:25px;color:var(--text-muted);}
+.portal-modern .hero-footnote i {width:3px;height:3px;background:#506b92;border-radius:50%;}
+.portal-modern .dimension-scene {height:555px;perspective:1100px;margin-left:-5px;}
+.portal-modern .scene-stars {background:radial-gradient(ellipse,#366fee28,transparent 66%);inset:0 -25px;}
+.portal-modern .scene-stars::before,.portal-modern .scene-stars::after {background:#dbeaff;box-shadow:130px 45px #366be2,200px 180px #526986,-110px 160px #7eaaef,80px 350px #436ba2,-65px 300px #314d79,180px 295px #9dbff2;}
+.portal-modern .scene-coordinate {left:20px;right:0;font:8px var(--font-mono);letter-spacing:1.3px;color:var(--text-muted);}
+.portal-modern .coord-top {top:4px;}
+.portal-modern .coord-top>span {color:var(--cyan);border:1px solid var(--surface-border);background:var(--surface);padding:6px 9px;}
+.portal-modern .coord-bottom {font-size:7px;}
+.portal-modern .orbital-system {width:340px;height:340px;margin:-170px;top:43%;}
+.portal-modern .core-cube {width:170px;height:170px;margin:-85px;}
+.portal-modern .core-face {border:1px solid #94bdffa6;border-radius:19px;background:linear-gradient(145deg,#8bb4ffed 0%,#387bf1ed 33%,#164397f5 100%);box-shadow:inset 0 1px 0 #e1edffd9,inset 0 0 42px #92b7ff33,0 0 40px #4383f730;color:#e5f0ff;}
+.portal-modern .core-face::after {inset:12px;border:1px solid #c6deff4d;border-radius:10px;}
+.portal-modern .core-face span {font-size:62px;color:#f2f7ff;text-shadow:0 2px 15px #b8d7ff66;}
+.portal-modern .core-face small {font:8px var(--font-mono);letter-spacing:2px;color:#dceaff;}
+.portal-modern .core-front {transform:translateZ(85px);}
+.portal-modern .core-back {transform:rotateY(180deg) translateZ(85px);}
+.portal-modern .core-right {transform:rotateY(90deg) translateZ(85px);background:linear-gradient(130deg,#3374d9f5,#091b46f5);}
+.portal-modern .core-left {transform:rotateY(-90deg) translateZ(85px);}
+.portal-modern .core-top {transform:rotateX(90deg) translateZ(85px);background:linear-gradient(145deg,#d9eafff5,#6ca0f5ed 50%,#3160b8f5);}
+.portal-modern .core-bottom {transform:rotateX(-90deg) translateZ(85px);}
+.portal-modern .orbit {border-color:#729fff6b;box-shadow:0 0 24px #4b8dff0a;}
+.portal-modern .orbit::before {background:#b8d4ff;box-shadow:0 0 20px #4b8dff;}
+.portal-modern .orbit-b {border-color:#6f99eb61;}
+.portal-modern .orbit-c {inset:-32px;border-color:#7391c32b;}
+.portal-modern .core-platform {width:300px;height:300px;margin:-150px;top:69%;border-radius:32px;border-color:#6191d84d;background:linear-gradient(145deg,#2d4c851c,#13264842);box-shadow:12px 12px 0 #0d1b304d,13px 13px 0 #739cd333,0 40px 65px #0005;}
+.portal-modern .platform-two {width:270px;height:270px;margin:-135px;top:73%;opacity:.45;}
+.portal-modern .platform-three {width:240px;height:240px;margin:-120px;top:77%;opacity:.22;}
+.portal-modern .holo-chip {padding:14px 16px;border:1px solid #577cab55;border-radius:12px;background:linear-gradient(135deg,#16243de8,#0c1526eb);box-shadow:0 18px 35px #0005,inset 0 1px #e1eeff15;}
+.portal-modern .chip-left {left:0;top:128px;}
+.portal-modern .chip-right {right:-3px;top:304px;}
+.portal-modern .holo-icon {color:#9ac2ff;border:1px solid #6ea6ff26;background:#639cff12;font-size:21px;}
+.portal-modern .holo-chip small {color:#8ba3c5;font-size:6px;letter-spacing:.9px;}
+.portal-modern .holo-chip strong {font-size:11px;line-height:1.8;color:#e6eeff;}
+.portal-modern .holo-chip i {background:#6eaaef;box-shadow:0 0 10px #609fff;}
+.portal-modern .holo-terminal {left:10%;width:83%;bottom:42px;padding:0 17px 17px;border:1px solid #607aa85e;background:linear-gradient(130deg,#16243ced,#0a1323f5);border-radius:13px;box-shadow:0 25px 55px #0007,inset 0 1px #d9e7ff14;transform:perspective(900px) rotateY(-9deg) rotateX(7deg) rotateZ(-2deg);}
+.portal-modern .holo-terminal-head {font-size:7px;color:#8ea5c5;letter-spacing:1.5px;}
+.portal-modern .holo-terminal-head i {background:#6c8cba;}
+.portal-modern .holo-terminal p {font-size:10px;line-height:2;color:#dde8f8;}
+.portal-modern .holo-terminal em {color:#8cbbff;}
+.portal-modern .holo-terminal .holo-success {color:#b2c8e8;}
+.portal-modern #motion-toggle {background:transparent;border-color:var(--surface-border);color:var(--text-muted);font:9px var(--font-mono);padding:8px 12px;}
+.portal-modern .hero-stats-row {display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--surface-border);border-bottom:1px solid var(--surface-border);border-radius:0;padding:27px 0;margin-top:39px;}
+.portal-modern .hero-stat-card,.portal-modern .hero-stat-card:first-child,.portal-modern .hero-stat-card:last-child {padding:2px 27px;border:0;border-right:1px solid var(--surface-border);border-radius:0;box-shadow:none;background:none;transform:none!important;}
+.portal-modern .hero-stat-card:first-child {padding-left:0;}
+.portal-modern .hero-stat-card:last-child {border-right:0;}
+.portal-modern .hero-stat-val {font:600 28px var(--font-display);letter-spacing:-1.2px;color:var(--text-primary);}
+.portal-modern .hero-stat-val span {margin-left:5px;font:11px var(--font-body);letter-spacing:0;color:var(--text-secondary);}
+.portal-modern .hero-stat-label {font:10px/1.7 var(--font-body);margin-top:6px;color:var(--text-muted);}
+.portal-modern .section:not(.hero-section) {padding:92px 0;border:0;}
+.portal-modern .section:nth-of-type(even) {background:linear-gradient(180deg,#10214313,transparent);}
+.portal-modern .section-header {max-width:670px;border:0;padding:0;margin:0 0 35px;text-align:left;}
+.portal-modern .section-badge,.portal-modern .section-badge.green,.portal-modern .section-badge.purple,.portal-modern .section-badge.orange {background:none;border:0;padding:0;font:10px var(--font-mono);letter-spacing:1.5px;color:var(--cyan);margin-bottom:17px;}
+.portal-modern .section-title {font-size:clamp(28px,3.3vw,42px);line-height:1.22;letter-spacing:-1.9px;font-weight:600;text-transform:none;color:var(--text-primary);}
+.portal-modern .section-desc {font-size:14px;line-height:1.85;color:var(--text-secondary);margin-top:14px;}
+.portal-modern .modern-learning-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:20px;perspective:1200px;}
+.portal-modern .modern-learning-card {background:linear-gradient(145deg,var(--surface),var(--bg-secondary));padding:29px;border:1px solid var(--surface-border);border-radius:18px;box-shadow:inset 0 1px #ffffff05;display:flex;flex-direction:column;min-height:318px;}
+.portal-modern .learning-top {display:flex;justify-content:space-between;align-items:center;margin-bottom:35px;color:var(--text-muted);font:9px var(--font-mono);letter-spacing:1px;}
+.portal-modern .learning-glyph {display:grid;place-items:center;width:42px;height:42px;background:#4b8dff12;color:var(--cyan);border:1px solid #4b8dff30;border-radius:12px;font:23px var(--font-mono);}
+.portal-modern .modern-learning-card h3 {font-size:19px;letter-spacing:-.5px;line-height:1.5;margin-bottom:12px;color:var(--text-primary);}
+.portal-modern .modern-learning-card p {font-size:12px;line-height:1.9;color:var(--text-secondary);margin-bottom:24px;}
+.portal-modern .modern-learning-card a {font-size:11px;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
+.portal-modern .modern-learning-card a span {font-size:18px;}
+.portal-modern .terminal-demo-wrapper {border:1px solid var(--surface-border-strong);border-radius:18px;background:#0a111f;box-shadow:0 25px 75px #0003;overflow:hidden;}
+.portal-modern .terminal-header {background:#111b2c;border-bottom:1px solid #25334a;min-height:58px;padding:15px 22px;}
+.portal-modern .terminal-title-pill {font:11px var(--font-mono);color:#b3c3dd;border:0;background:none;}
+.portal-modern .terminal-session-telemetry {gap:16px;color:#8fa6c8;}
+.portal-modern .telemetry-item {font-size:8px;}
+.portal-modern .terminal-live-link {font:10px var(--font-mono);color:#9cbfff;}
+.portal-modern .terminal-quick-pills {background:#0b1423;border-bottom:1px solid #22324a;padding:14px 22px;gap:8px;}
+.portal-modern .command-pill {background:#142139;border:1px solid #2c4164;color:#b5cdf1;border-radius:6px;padding:6px 10px;font-size:10px;}
+.portal-modern .terminal-screen {min-height:295px;background:#080f1b;padding:25px;color:#dbe7f7;}
+.portal-modern .term-line,.portal-modern .terminal-input,.portal-modern .terminal-prompt {font-size:12px;line-height:1.95;}
+.portal-modern .terminal-footer-hint {background:#101a2a;color:#8da3c2;border-top:1px solid #23334b;padding:13px 22px;font-size:10px;}
+.portal-modern .lab-grid {gap:20px;}
+.portal-modern .lab-card {padding:0;background:linear-gradient(145deg,var(--surface),var(--bg-secondary));border:1px solid var(--surface-border);border-radius:18px;box-shadow:inset 0 1px #ffffff06;overflow:hidden;}
+.portal-modern .lab-card::before {display:none;}
+.portal-modern .lab-card:hover {border-color:#527ab7;box-shadow:0 15px 42px #0003;}
+.portal-modern .lab-card-top {padding:25px;}
+.portal-modern .lab-domain-badge {font:9px var(--font-mono);letter-spacing:.8px;color:var(--text-muted);background:transparent;border:0;padding:0;}
+.portal-modern .lab-title {font-size:21px;font-weight:600;line-height:1.35;letter-spacing:-.6px;margin:24px 0 12px;color:var(--text-primary);}
+.portal-modern .lab-desc {font-size:12px;line-height:1.85;color:var(--text-secondary);}
+.portal-modern .lab-meta-row {font-size:10px;gap:18px;margin:19px 0;color:var(--text-muted);}
+.portal-modern .lab-tag {font-size:9px;padding:5px 8px;background:var(--bg-tertiary);border-color:var(--surface-border);color:var(--text-secondary);border-radius:5px;}
+.portal-modern .lab-badge {font:9px var(--font-mono);padding:5px 8px;border-radius:6px;}
+.portal-modern .lab-card-actions {padding:16px 25px;border-top:1px solid var(--surface-border);background:transparent;}
+.portal-modern .lab-xp {font-size:10px;color:var(--text-muted);}
+.portal-modern .lab-card-actions .btn {font-size:10px;padding:9px 12px;}
+.portal-modern .filter-btn {font-size:12px;padding:10px 16px;background:var(--surface);border:1px solid var(--surface-border);border-radius:8px;color:var(--text-secondary);}
+.portal-modern .filter-btn.active {background:#387de9;color:#fff;border-color:#70a7ff;box-shadow:0 3px 10px #1b55ae22;}
+.portal-modern .lab-search-input {font-size:12px;background:var(--surface);border:1px solid var(--surface-border);color:var(--text-primary);border-radius:8px;}
+.portal-modern .feature-pill-card,.portal-modern .arch-diagram-card,.portal-modern .audit-log-preview,.portal-modern .calc-container,.portal-modern .docs-layout {border:1px solid var(--surface-border);background:var(--surface);border-radius:18px;box-shadow:0 18px 40px #0001;}
+.portal-modern .feature-pill-card {padding:24px;}
+.portal-modern .feature-pill-card h4 {font-size:15px;line-height:1.5;}
+.portal-modern .feature-pill-card p {font-size:12px;line-height:1.8;color:var(--text-secondary);}
+.portal-modern .arch-node {background:var(--bg-secondary);border:1px solid var(--surface-border);border-radius:10px;}
+.portal-modern .arch-node-title {font-size:13px;color:var(--text-primary);}
+.portal-modern .arch-node-desc {font-size:11px;line-height:1.8;color:var(--text-secondary);}
+.portal-modern .arch-connector {font-size:10px;color:var(--text-muted);}
+.portal-modern .cta-banner {position:relative;background:radial-gradient(ellipse at 70% 0,#2e68d23b,transparent 65%),var(--surface);border:1px solid #4b8dff45;border-radius:24px;padding:65px 50px;overflow:hidden;}
+.portal-modern .cta-banner::before {background:none;}
+.portal-modern .cta-title {font-size:clamp(28px,3.5vw,45px);line-height:1.2;letter-spacing:-1.7px;background:none;color:var(--text-primary);-webkit-text-fill-color:currentColor;}
+.portal-modern .cta-banner p {font-size:14px;line-height:1.8;color:var(--text-secondary);}
+.portal-modern .site-footer {background:var(--bg-primary);border-top:1px solid var(--surface-border);padding:45px 0 28px;}
+.portal-modern .footer-desc {font-size:12px;line-height:1.9;color:var(--text-muted);}
+.portal-modern .footer-col h4 {font:10px var(--font-mono);letter-spacing:1px;color:var(--text-secondary);}
+.portal-modern .footer-col a {font-size:12px;color:var(--text-muted);}
+.portal-modern .modal-dialog {background:var(--surface);border:1px solid var(--surface-border-strong);border-radius:22px;box-shadow:0 35px 100px #0008;}
+.portal-modern .auth-modal-header h2 {font-size:30px;letter-spacing:-1px;}
+.portal-modern :is(a,button,input):focus-visible {outline:2px solid #8dbaff;outline-offset:4px;}
+[data-theme="daylight"] .portal-modern .hero-title>span {background-image:linear-gradient(115deg,#377dda,#2755b2);}
+[data-theme="daylight"] .portal-modern .top-beacon-bar {background:#e9f0fb;border-color:#d5e1f2;color:#566c90;}
+[data-theme="daylight"] .portal-modern .beacon-metric span {color:#526986;}
+[data-theme="daylight"] .portal-modern .core-cube {filter:drop-shadow(0 10px 15px #346edb33);}
+@media(min-width:1600px) {.portal-modern .hero-section{padding-top:85px;}.portal-modern .hero-layout{min-height:610px;}}
+@media(max-width:1120px) {
+  .portal-modern .container {padding-inline:28px;}
+  .portal-modern .nav-inner {gap:16px;}
+  .portal-modern .nav-links {gap:15px;}
+  .portal-modern .nav-actions {gap:12px;}
+  .portal-modern .theme-toggle-wrap {display:none;}
+  .portal-modern .hero-title {font-size:65px;letter-spacing:-4px;}
+  .portal-modern .holo-chip {padding:11px;}
+  .portal-modern .holo-chip strong {font-size:9px;}
+  .portal-modern .core-cube {scale:.9;}
+  .portal-modern .modern-learning-card {padding:23px;}
+}
+@media(max-width:850px) {
+  .portal-modern .top-beacon-bar {padding-inline:25px;}
+  .portal-modern .beacon-metrics {display:none;}
+  .portal-modern .header-nav {height:74px;}
+  .portal-modern .nav-links {display:none;}
+  .portal-modern .nav-links.mobile-open {display:flex;position:absolute;left:0;right:0;top:74px;padding:24px;background:var(--surface);border-bottom:1px solid var(--surface-border);gap:24px;}
+  .portal-modern .auth-logged-in .operator-badge-pill {display:none;}
+  .portal-modern .btn-mobile-menu {display:block;}
+  .portal-modern .hero-section {padding-top:45px;}
+  .portal-modern .hero-layout {grid-template-columns:1fr;gap:22px;}
+  .portal-modern .hero-copy {max-width:630px;}
+  .portal-modern .hero-title {font-size:70px;letter-spacing:-4px;}
+  .portal-modern .hero-description {max-width:550px;}
+  .portal-modern .dimension-scene {width:100%;max-width:600px;margin:0 auto;height:530px;}
+  .portal-modern .hero-stats-row {grid-template-columns:repeat(2,1fr);gap:26px 0;margin-top:20px;}
+  .portal-modern .hero-stat-card:nth-child(2) {border-right:0;}
+  .portal-modern .hero-stat-card:nth-child(3) {padding-left:0;}
+  .portal-modern .modern-learning-grid {grid-template-columns:1fr;}
+  .portal-modern .modern-learning-card {min-height:auto;padding:28px;}
+  .portal-modern .learning-top {margin-bottom:24px;}
+  .portal-modern .section:not(.hero-section) {padding:65px 0;}
+  .portal-modern .terminal-session-telemetry .telemetry-item {display:none;}
+}
+@media(max-width:520px) {
+  .portal-modern .container {padding-inline:20px;}
+  .portal-modern .top-beacon-bar {padding-inline:20px;font-size:7px;letter-spacing:.9px;min-height:28px;}
+  .portal-modern .logo-title {font-size:20px;}
+  .portal-modern .logo-icon {width:32px;height:35px;}
+  .portal-modern .logo-tag {font-size:6px;letter-spacing:1.3px;}
+  .portal-modern .nav-actions {gap:10px;}
+  .portal-modern .auth-logged-in .btn-logout-small {display:none;}
+  .portal-modern .auth-logged-in .nav-btn-signup {font-size:10px!important;padding:9px 10px!important;}
+  .portal-modern .nav-btn-login {display:none;}
+  .portal-modern .nav-btn-signup {font-size:11px;padding:10px 12px;}
+  .portal-modern .btn-mobile-menu {font-size:21px;padding:7px;}
+  .portal-modern .hero-pill-badge {font-size:7px;letter-spacing:.7px;margin-bottom:23px;}
+  .portal-modern .hero-title {font-size:clamp(46px,12vw,62px);letter-spacing:-3px;line-height:1.11;}
+  .portal-modern .hero-description {font-size:13px;line-height:1.9;}
+  .portal-modern .hero-cta-group {gap:9px;flex-wrap:wrap;}
+  .portal-modern .btn-lg {padding:14px;font-size:11px;gap:13px;}
+  .portal-modern .hero-footnote {font-size:8px;gap:9px;}
+  .portal-modern .dimension-scene {height:440px;margin-top:18px;}
+  .portal-modern .orbital-system {width:270px;height:270px;margin:-135px;}
+  .portal-modern .core-cube {scale:.72;}
+  .portal-modern .orbit-c {inset:-17px;}
+  .portal-modern .core-platform {width:250px;height:250px;margin:-125px;}
+  .portal-modern .platform-two {width:220px;height:220px;margin:-110px;}
+  .portal-modern .platform-three {width:190px;height:190px;margin:-95px;}
+  .portal-modern .scene-coordinate {left:0;font-size:6px;letter-spacing:.8px;}
+  .portal-modern .coord-bottom {font-size:6px;}
+  .portal-modern .chip-left {top:106px;left:0;}
+  .portal-modern .chip-right {top:251px;right:0;}
+  .portal-modern .holo-chip {padding:9px;gap:8px;}
+  .portal-modern .holo-chip small {font-size:5px;}
+  .portal-modern .holo-chip strong {font-size:8px;}
+  .portal-modern .holo-icon {width:25px;height:27px;font-size:16px;}
+  .portal-modern .holo-chip i {display:none;}
+  .portal-modern .holo-terminal {left:7%;width:90%;bottom:38px;padding:0 12px 12px;}
+  .portal-modern .holo-terminal-head {font-size:6px;}
+  .portal-modern .holo-terminal p {font-size:8px;}
+  .portal-modern #motion-toggle {font-size:8px;padding:7px 9px;}
+  .portal-modern .hero-stat-card,.portal-modern .hero-stat-card:first-child,.portal-modern .hero-stat-card:last-child {padding:0 15px;}
+  .portal-modern .hero-stat-card:nth-child(odd) {padding-left:0;}
+  .portal-modern .hero-stat-val {font-size:24px;letter-spacing:-.8px;}
+  .portal-modern .hero-stat-val span {font-size:9px;margin-left:3px;}
+  .portal-modern .hero-stat-label {font-size:9px;}
+  .portal-modern .section-title {font-size:29px;letter-spacing:-1.1px;}
+  .portal-modern .section-desc {font-size:13px;}
+  .portal-modern .section-header {margin-bottom:26px;}
+  .portal-modern .terminal-header {padding:12px;min-height:50px;}
+  .portal-modern .terminal-title-pill {font-size:8px;}
+  .portal-modern .terminal-live-link {font-size:8px;}
+  .portal-modern .terminal-quick-pills {padding:12px;}
+  .portal-modern .terminal-screen {padding:16px;min-height:280px;}
+  .portal-modern .term-line,.portal-modern .terminal-input,.portal-modern .terminal-prompt {font-size:10px;}
+  .portal-modern .terminal-footer-hint {padding:12px;font-size:8px;flex-wrap:wrap;gap:10px;}
+  .portal-modern .lab-card-top {padding:22px;}
+  .portal-modern .lab-card-actions {padding:16px 22px;}
+  .portal-modern .cta-banner {padding:40px 24px;border-radius:18px;}
+  .portal-modern .cta-title {font-size:29px;}
+}
+@media(max-width:380px) {
+  .portal-modern .nav-inner {padding-inline:16px;gap:8px;}
+  .portal-modern .logo-title {font-size:18px;}
+  .portal-modern .logo-icon {width:28px;height:31px;}
+  .portal-modern .logo-brand {gap:7px;}
+  .portal-modern .nav-actions {gap:7px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  html {scroll-behavior:auto;}
+  .portal-modern *,.portal-modern *::before,.portal-modern *::after {animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}

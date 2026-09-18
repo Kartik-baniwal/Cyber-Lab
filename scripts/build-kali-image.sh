@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-set -e
-
-# RangeForge - Build Custom Kali Linux Docker Image
-echo "=== Building Custom Kali Linux Image for RangeForge ==="
-DOCKER_BIN=$(which docker || echo "/usr/local/bin/docker")
-
-$DOCKER_BIN build -t rangeforge/kali-custom:latest -f containers/workstation-kali/Dockerfile.custom .
-
-echo "=== Build Complete ==="
-$DOCKER_BIN images | grep rangeforge/kali-custom
+set -euo pipefail
+cd "$(dirname "$0")/.."
+DOCKER_BIN="${DOCKER_BIN:-docker}"
+echo "Building full Kali Rolling (large download; requires substantial Docker disk space)..."
+"$DOCKER_BIN" build --pull --no-cache -t rangeforge/kali-custom:latest -f containers/workstation-kali/Dockerfile.custom containers/workstation-kali
+"$DOCKER_BIN" run --rm rangeforge/kali-custom:latest bash -lc 'cat /etc/os-release; kali-tools; sudo -n true; ifconfig -a'

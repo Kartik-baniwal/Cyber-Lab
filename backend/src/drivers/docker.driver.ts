@@ -1,7 +1,7 @@
 import { IOrchestratorDriver } from './orchestrator.interface';
 import { LabSession, ProvisionedEnvironment, CommandResult } from '../models/types';
 import { WebSocket } from 'ws';
-import { execFile } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import util from 'util';
 
 const execFileAsync = util.promisify(execFile);
@@ -43,12 +43,11 @@ export class DockerDriver implements IOrchestratorDriver {
       await execFileAsync(DOCKER_BIN, ['rm', '-f', wsContainerName]);
     } catch {}
 
-    // Choose image
-    let chosenImage = 'rangeforge/kali-custom:latest';
+    const chosenImage = process.env.KALI_IMAGE || 'rangeforge/kali-custom:latest';
     try {
       await execFileAsync(DOCKER_BIN, ['image', 'inspect', chosenImage]);
     } catch {
-      chosenImage = 'kalilinux/kali-rolling:latest';
+      throw new Error(`Full Kali image ${chosenImage} is missing. Run bash scripts/build-kali-image.sh first.`);
     }
 
     await execFileAsync(DOCKER_BIN, [
@@ -56,6 +55,9 @@ export class DockerDriver implements IOrchestratorDriver {
       '-d',
       '--name', wsContainerName,
       '--hostname', 'kali',
+      '--cpus', '4',
+      '--memory', '3584m',
+      '--memory-swap', '3584m',
       '--cap-add=NET_ADMIN',
       '--cap-add=NET_RAW',
       '-w', '/root',
@@ -63,14 +65,9 @@ export class DockerDriver implements IOrchestratorDriver {
       'sleep', 'infinity'
     ]);
 
-    // Inject dynamic flag into /root/flag.txt
-    try {
-      const injectCmd = `echo '${session.dynamicFlag}' > /root/flag.txt && chmod 600 /root/flag.txt`;
-      await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c', injectCmd]);
-      console.log(`[Docker Driver] Injected dynamic flag into ${wsContainerName}`);
-    } catch (e) {
-      console.warn(`[Docker Driver] Flag injection warning:`, e);
-    }
+    // Preserve the real sudo binary supplied by Kali.
+    await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c',
+      'printf "%s\\n" "$1" > /root/flag.txt && chmod 600 /root/flag.txt', '--', session.dynamicFlag]);
 
     return wsContainerName;
   }
@@ -109,17 +106,19 @@ export class DockerDriver implements IOrchestratorDriver {
       return { stdout: '', exitCode: 0 };
     }
 
+    const cleanCmd = cmd;
+
     const wsContainerName = await this.ensureContainerRunning(session);
-    console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cmd}`);
+    console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cleanCmd}`);
 
     try {
       const { stdout, stderr } = await execFileAsync(
         DOCKER_BIN,
-        ['exec', wsContainerName, '/bin/bash', '-c', cmd],
+        ['exec', wsContainerName, '/bin/bash', '-c', cleanCmd],
         { timeout: 45000, maxBuffer: 1024 * 1024 * 2 }
       );
 
-      const combined = stdout || stderr || '';
+      const combined = stdout + stderr;
       return {
         stdout: combined,
         exitCode: 0
@@ -135,50 +134,29 @@ export class DockerDriver implements IOrchestratorDriver {
 
   async attachTerminal(session: LabSession, ws: WebSocket): Promise<void> {
     const wsContainerName = await this.ensureContainerRunning(session);
-    const isKali = session.os === 'Kali Linux';
-    const prompt = isKali
-      ? '\x1b[1;31mroot\x1b[0m@\x1b[1;36mkali\x1b[0m:\x1b[1;34m~#\x1b[0m '
-      : '\x1b[32mlearner@range\x1b[0m:\x1b[34m~/lab\x1b[0m$ ';
-
-    ws.send(`\r\n\x1b[1;32m[Cyber Lab Docker Engine]\x1b[0m Connected to container: \x1b[1;36m${wsContainerName}\x1b[0m\r\n`);
-    ws.send(`Live Workstation: \x1b[33m${session.os}\x1b[0m (Real Kali Linux Rolling Kernel)\r\n`);
-    ws.send(`Type any Linux or offensive security tool commands. Type 'clear' to clear screen.\r\n\r\n`);
-    ws.send(prompt);
-
-    let currentInput = '';
-
-    ws.on('message', async (data: Buffer | string) => {
-      const input = data.toString();
-
-      if (input === '\r' || input === '\n') {
-        ws.send('\r\n');
-        const cmd = currentInput.trim();
-        currentInput = '';
-
-        if (cmd === 'clear') {
-          ws.send('\x1b[2J\x1b[H');
-          ws.send(prompt);
-          return;
-        }
-
-        if (cmd) {
-          const result = await this.executeCommand(session, cmd);
-          const formatted = result.stdout.replace(/\r?\n/g, '\r\n');
-          ws.send(formatted);
-          if (!formatted.endsWith('\r\n')) {
-            ws.send('\r\n');
-          }
-        }
-        ws.send(prompt);
-      } else if (input === '\x7f' || input === '\b') {
-        if (currentInput.length > 0) {
-          currentInput = currentInput.slice(0, -1);
-          ws.send('\b \b');
-        }
-      } else if (input >= ' ' && input <= '~') {
-        currentInput += input;
-        ws.send(input);
-      }
+    ws.send('\r\nConnected to real Kali Rolling. This container shares the Docker host kernel.\r\n');
+    // script allocates a real Linux PTY, preserving shell state, Ctrl-C, and interactive tools.
+    const terminal = spawn(DOCKER_BIN, [
+      'exec', '-i', '-e', 'TERM=xterm-256color', wsContainerName,
+      'script', '-qefc', '/bin/bash -il', '/dev/null'
+    ], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const send = (data: Buffer) => {
+      if (ws.readyState === WebSocket.OPEN) ws.send(data.toString());
+    };
+    terminal.stdout.on('data', send);
+    terminal.stderr.on('data', send);
+    terminal.on('error', (error) => {
+      send(Buffer.from(`\r\nTerminal failed: ${error.message}\r\n`));
+      ws.close();
+    });
+    terminal.on('close', () => ws.close());
+    terminal.stdin.on('error', () => ws.close());
+    ws.on('message', (data) => {
+      if (terminal.stdin.writable) terminal.stdin.write(data.toString());
+    });
+    ws.on('close', () => {
+      terminal.stdin.end();
+      terminal.kill();
     });
   }
 }
