@@ -39,12 +39,10 @@ class TerminalGateway {
                 if (char === '\r' || char === '\n') {
                     const command = submitted.trim();
                     submitted = '';
-                    if ((0, command_policy_1.blocksPwd)(session, command))
-                        continue;
-                    if (command === session.lab.commands[0]) {
+                    if (!(0, command_policy_1.blocksCommand)(session, command) && command === session.lab.commands[0]) {
                         flag_service_1.FlagService.getInstance().completeObjective(session.id, 0);
                     }
-                    else if (command === session.lab.commands[1] && session.completedObjectives.includes(0)) {
+                    else if (!(0, command_policy_1.blocksCommand)(session, command) && command === session.lab.commands[1] && session.completedObjectives.includes(0)) {
                         flag_service_1.FlagService.getInstance().completeObjective(session.id, 1);
                     }
                 }

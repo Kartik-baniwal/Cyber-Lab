@@ -3,7 +3,7 @@ import { LabSession, ProvisionedEnvironment, CommandResult } from '../models/typ
 import { WebSocket } from 'ws';
 import { execFile, spawn } from 'child_process';
 import util from 'util';
-import { restrictsPwd, LINUX_SHELL_POLICY } from '../services/command-policy';
+import { isFundamentals, isRestrictedLab, runnerForSession } from '../services/command-policy';
 
 const execFileAsync = util.promisify(execFile);
 const DOCKER_BIN = process.env.DOCKER_BIN || (process.platform === 'darwin' ? '/usr/local/bin/docker' : 'docker');
@@ -106,21 +106,30 @@ export class DockerDriver implements IOrchestratorDriver {
     }
   }
 
+  private async prepareFundamentals(container: string): Promise<void> {
+    await execFileAsync(DOCKER_BIN, ['exec', container, '/bin/bash', '-c',
+      'mkdir -p /home/learner/lab; if [ ! -e /home/learner/lab/flag.txt ]; then cp /root/flag.txt /home/learner/lab/flag.txt; fi; chown learner:learner /home/learner/lab /home/learner/lab/flag.txt; chmod 700 /home/learner/lab; chmod 600 /home/learner/lab/flag.txt']);
+  }
+
   async executeCommand(session: LabSession, rawCommand: string): Promise<CommandResult> {
     const cmd = rawCommand.trim();
     if (!cmd) {
       return { stdout: '', exitCode: 0 };
     }
 
-    const cleanCmd = restrictsPwd(session) ? `${LINUX_SHELL_POLICY}\n${cmd}` : cmd;
+    const cleanCmd = cmd;
 
     const wsContainerName = await this.ensureContainerRunning(session);
+    if (isFundamentals(session)) await this.prepareFundamentals(wsContainerName);
+    const runner = runnerForSession(session);
     console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cleanCmd}`);
 
     try {
       const { stdout, stderr } = await execFileAsync(
         DOCKER_BIN,
-        ['exec', wsContainerName, '/bin/bash', '-c', cleanCmd],
+        runner
+          ? ['exec', ...(isFundamentals(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName, '/usr/bin/python3', '-I', '-c', runner, cleanCmd]
+          : ['exec', ...(isFundamentals(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName, '/bin/bash', '-c', cleanCmd],
         { timeout: 45000, maxBuffer: 1024 * 1024 * 2 }
       );
 
@@ -141,19 +150,19 @@ export class DockerDriver implements IOrchestratorDriver {
   async attachTerminal(session: LabSession, ws: WebSocket): Promise<void> {
     const wsContainerName = await this.ensureContainerRunning(session);
     let shellCommand = '/bin/bash -il';
-    if (restrictsPwd(session)) {
-      // Install on every attachment so existing containers receive the policy
-      // when the learner reconnects. Bash handles editing/history/paste itself.
-      const rc = '[ -f /etc/profile ] && . /etc/profile\n[ -f ~/.bashrc ] && . ~/.bashrc\n' + LINUX_SHELL_POLICY;
-      await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c',
-        'printf "%s\\n" "$1" > /tmp/cyberlab-linux.bashrc', '--', rc]);
-      shellCommand = '/bin/bash --rcfile /tmp/cyberlab-linux.bashrc -i';
+    if (isFundamentals(session)) await this.prepareFundamentals(wsContainerName);
+    const restricted = isRestrictedLab(session);
+    const runner = runnerForSession(session);
+    if (restricted) {
+      const quote = (value: string) => "'" + value.replace(/'/g, "'\\''") + "'";
+      shellCommand = `/usr/bin/python3 -I -c ${quote(runner || '')}`;
     }
     const osName = session.os === 'Ubuntu' ? 'Ubuntu' : 'Kali Rolling';
     ws.send(`\r\nConnected to real ${osName}. This container shares the Docker host kernel.\r\n`);
     // script allocates a real Linux PTY, preserving shell state, Ctrl-C, and interactive tools.
     const terminal = spawn(DOCKER_BIN, [
-      'exec', '-i', '-e', 'TERM=xterm-256color', wsContainerName,
+      'exec', '-i', '-e', 'TERM=xterm-256color',
+      ...(isFundamentals(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName,
       'script', '-qefc', shellCommand, '/dev/null'
     ], { stdio: ['pipe', 'pipe', 'pipe'] });
     const send = (data: Buffer) => {

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-const source = fs.readFileSync(path.join(__dirname, '../public/RangeForge-Project/app.js'), 'utf8');
+const source = fs.readFileSync(path.join(__dirname, '../public/workspace/app.js'), 'utf8');
 const connection = source.slice(source.indexOf('function setBackendStatus('), source.indexOf('const KEY_COMPLETED_HISTORY'));
 const cards = source.slice(source.indexOf('function renderCards()'), source.indexOf('function bindLaunch()'));
 

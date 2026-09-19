@@ -600,22 +600,47 @@ function initDocsAndAPI() {
   const apiOutput = document.getElementById('api-response-output');
   const apiLatency = document.getElementById('api-latency');
 
+  const endpointUrls: Record<string, string> = {
+    'root': '/api',
+    'health': '/api/health',
+    'labs': '/api/labs',
+    'session': '/api/sessions',
+    'progress': '/api/progress'
+  };
+
   apiBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const epKey = btn.getAttribute('data-ep');
+    btn.addEventListener('click', async () => {
+      const epKey = btn.getAttribute('data-ep') || '';
       apiBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Simulate network request
+      const path = endpointUrls[epKey] || '/api';
+      const apiBase = (window.location.protocol === 'file:' || (window.location.port !== '3001' && window.location.port !== '5173'))
+        ? `http://${window.location.hostname || 'localhost'}:3001`
+        : '';
+      const fullUrl = `${apiBase}${path}`;
+
       if (apiOutput) {
-        apiOutput.textContent = 'Fetching response from http://localhost:3001/api...';
-        const ms = Math.floor(Math.random() * 18) + 8;
-        setTimeout(() => {
-          if (API_RESPONSES[epKey]) {
-            apiOutput.textContent = JSON.stringify(API_RESPONSES[epKey], null, 2);
+        apiOutput.textContent = `Fetching live response from ${fullUrl}...`;
+        const start = performance.now();
+        try {
+          const res = await fetch(fullUrl, { signal: AbortSignal.timeout(5000) });
+          const ms = Math.round(performance.now() - start);
+          if (res.ok) {
+            const data = await res.json();
+            apiOutput.textContent = JSON.stringify(data, null, 2);
+            if (apiLatency) apiLatency.textContent = `Live Response Time: ${ms}ms (${res.status} OK)`;
+            return;
           }
-          if (apiLatency) apiLatency.textContent = `Response Time: ${ms}ms`;
-        }, 120);
+        } catch {
+          // If offline or network error, fallback gracefully
+        }
+
+        const ms = Math.floor(Math.random() * 18) + 8;
+        if (API_RESPONSES[epKey]) {
+          apiOutput.textContent = JSON.stringify(API_RESPONSES[epKey], null, 2);
+        }
+        if (apiLatency) apiLatency.textContent = `Cached Response Time: ${ms}ms`;
       }
     });
   });

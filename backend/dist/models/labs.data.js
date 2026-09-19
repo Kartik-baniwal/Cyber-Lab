@@ -10,7 +10,7 @@ const KALI_LABS = [
         time: 30,
         icon: '>_',
         color: '',
-        desc: 'Find your footing in the shell. Navigate files, inspect permissions, and uncover a hidden flag.',
+        desc: 'Practice Linux files, permissions, processes, networking, scripting, and administration in a full Bash shell. Run kali-tools linux to inspect installed utilities.',
         tags: ['Linux', 'Command line'],
         os: 'Kali Linux',
         tasks: ['Find your working directory', 'List the lab files', 'Capture the hidden flag'],
@@ -31,7 +31,7 @@ const KALI_LABS = [
         time: 45,
         icon: '⌘',
         color: 'blue',
-        desc: 'Map an isolated network and discover the services running beneath the surface.',
+        desc: 'Explore the complete Kali information-gathering, vulnerability, and network analysis collections. Run kali-tools recon to inspect installed tools.',
         tags: ['Networking', 'Enumeration'],
         os: 'Kali Linux',
         tasks: ['Inspect your network address', 'Discover target services', 'Capture the service flag'],
@@ -54,7 +54,7 @@ const KALI_LABS = [
         time: 60,
         icon: '⊞',
         color: 'orange',
-        desc: 'Investigate a vulnerable web application and learn to recognize common security flaws.',
+        desc: 'Use the complete Kali web application assessment collection. Run kali-tools web to inspect installed tools.',
         tags: ['HTTP', 'OWASP'],
         os: 'Kali Linux',
         tasks: ['Inspect the HTTP response', 'Review the application notes', 'Capture the application flag'],
@@ -169,7 +169,7 @@ const ubuntuTemplates = [
 const UBUNTU_LABS = ubuntuTemplates.map(({ source, id, name }) => {
     const template = KALI_LABS.find(lab => lab.id === source);
     return {
-        ...template, id, name, os: 'Ubuntu',
+        ...template, id, name, os: 'Ubuntu', allowedCommands: undefined,
         workstationImage: 'cyberrange/workstation-ubuntu:latest',
         tags: ['Ubuntu', ...template.tags],
         defaultFlagPattern: `RANGE{${id.replace(/-/g, '_')}}`,

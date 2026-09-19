@@ -905,6 +905,7 @@ docker compose up -d
                 </p>
 
                 <div className="api-endpoint-selector">
+                  <button className="api-ep-btn" data-ep="root">GET /api</button>
                   <button className="api-ep-btn active" data-ep="health">GET /api/health</button>
                   <button className="api-ep-btn" data-ep="labs">GET /api/labs</button>
                   <button className="api-ep-btn" data-ep="session">POST /api/sessions</button>

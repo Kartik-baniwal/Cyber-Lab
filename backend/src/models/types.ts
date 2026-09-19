@@ -11,6 +11,7 @@ export interface ObjectiveDefinition {
 }
 
 export interface LabDefinition {
+  allowedCommands?: string[];
   id: string;
   name: string;
   category: string;

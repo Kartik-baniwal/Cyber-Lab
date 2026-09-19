@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
 import { SessionManager } from './session.manager';
 import { FlagService } from './flag.service';
-import { blocksPwd } from './command-policy';
+import { blocksCommand } from './command-policy';
 
 export class TerminalGateway {
   private static instance: TerminalGateway;
@@ -44,10 +44,9 @@ export class TerminalGateway {
         if (char === '\r' || char === '\n') {
           const command = submitted.trim();
           submitted = '';
-          if (blocksPwd(session!, command)) continue;
-          if (command === session!.lab.commands[0]) {
+          if (!blocksCommand(session!, command) && command === session!.lab.commands[0]) {
             FlagService.getInstance().completeObjective(session!.id, 0);
-          } else if (command === session!.lab.commands[1] && session!.completedObjectives.includes(0)) {
+          } else if (!blocksCommand(session!, command) && command === session!.lab.commands[1] && session!.completedObjectives.includes(0)) {
             FlagService.getInstance().completeObjective(session!.id, 1);
           }
         } else if (char === '\x7f' || char === '\b') {

@@ -100,16 +100,25 @@ class DockerDriver {
             console.warn(`[Docker Driver] Error pruning container ${wsContainerName}:`, e);
         }
     }
+    async prepareFundamentals(container) {
+        await execFileAsync(DOCKER_BIN, ['exec', container, '/bin/bash', '-c',
+            'mkdir -p /home/learner/lab; if [ ! -e /home/learner/lab/flag.txt ]; then cp /root/flag.txt /home/learner/lab/flag.txt; fi; chown learner:learner /home/learner/lab /home/learner/lab/flag.txt; chmod 700 /home/learner/lab; chmod 600 /home/learner/lab/flag.txt']);
+    }
     async executeCommand(session, rawCommand) {
         const cmd = rawCommand.trim();
         if (!cmd) {
             return { stdout: '', exitCode: 0 };
         }
-        const cleanCmd = (0, command_policy_1.restrictsPwd)(session) ? `${command_policy_1.LINUX_SHELL_POLICY}\n${cmd}` : cmd;
+        const cleanCmd = cmd;
         const wsContainerName = await this.ensureContainerRunning(session);
+        if ((0, command_policy_1.isFundamentals)(session))
+            await this.prepareFundamentals(wsContainerName);
+        const runner = (0, command_policy_1.runnerForSession)(session);
         console.log(`[Docker Driver] Executing inside ${wsContainerName}: ${cleanCmd}`);
         try {
-            const { stdout, stderr } = await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c', cleanCmd], { timeout: 45000, maxBuffer: 1024 * 1024 * 2 });
+            const { stdout, stderr } = await execFileAsync(DOCKER_BIN, runner
+                ? ['exec', ...((0, command_policy_1.isFundamentals)(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName, '/usr/bin/python3', '-I', '-c', runner, cleanCmd]
+                : ['exec', ...((0, command_policy_1.isFundamentals)(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName, '/bin/bash', '-c', cleanCmd], { timeout: 45000, maxBuffer: 1024 * 1024 * 2 });
             const combined = stdout + stderr;
             return {
                 stdout: combined,
@@ -127,19 +136,20 @@ class DockerDriver {
     async attachTerminal(session, ws) {
         const wsContainerName = await this.ensureContainerRunning(session);
         let shellCommand = '/bin/bash -il';
-        if ((0, command_policy_1.restrictsPwd)(session)) {
-            // Install on every attachment so existing containers receive the policy
-            // when the learner reconnects. Bash handles editing/history/paste itself.
-            const rc = '[ -f /etc/profile ] && . /etc/profile\n[ -f ~/.bashrc ] && . ~/.bashrc\n' + command_policy_1.LINUX_SHELL_POLICY;
-            await execFileAsync(DOCKER_BIN, ['exec', wsContainerName, '/bin/bash', '-c',
-                'printf "%s\\n" "$1" > /tmp/cyberlab-linux.bashrc', '--', rc]);
-            shellCommand = '/bin/bash --rcfile /tmp/cyberlab-linux.bashrc -i';
+        if ((0, command_policy_1.isFundamentals)(session))
+            await this.prepareFundamentals(wsContainerName);
+        const restricted = (0, command_policy_1.isRestrictedLab)(session);
+        const runner = (0, command_policy_1.runnerForSession)(session);
+        if (restricted) {
+            const quote = (value) => "'" + value.replace(/'/g, "'\\''") + "'";
+            shellCommand = `/usr/bin/python3 -I -c ${quote(runner || '')}`;
         }
         const osName = session.os === 'Ubuntu' ? 'Ubuntu' : 'Kali Rolling';
         ws.send(`\r\nConnected to real ${osName}. This container shares the Docker host kernel.\r\n`);
         // script allocates a real Linux PTY, preserving shell state, Ctrl-C, and interactive tools.
         const terminal = (0, child_process_1.spawn)(DOCKER_BIN, [
-            'exec', '-i', '-e', 'TERM=xterm-256color', wsContainerName,
+            'exec', '-i', '-e', 'TERM=xterm-256color',
+            ...((0, command_policy_1.isFundamentals)(session) ? ['-u', 'learner', '-w', '/home/learner/lab'] : []), wsContainerName,
             'script', '-qefc', shellCommand, '/dev/null'
         ], { stdio: ['pipe', 'pipe', 'pipe'] });
         const send = (data) => {

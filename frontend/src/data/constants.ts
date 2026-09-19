@@ -618,7 +618,20 @@ kubectl get pods -n cyberrange -w`
 };
 
 // API Mock Responses
-export const API_RESPONSES = {
+export const API_RESPONSES: Record<string, any> = {
+  'root': {
+    service: 'Cyber Lab Backend API & Orchestrator',
+    status: 'online',
+    version: '2.9.0',
+    endpoints: {
+      root: '/api',
+      health: '/api/health',
+      labs: '/api/labs',
+      sessions: '/api/sessions',
+      progress: '/api/progress'
+    },
+    documentation: 'https://github.com/Kartik-baniwal/Cyber-Lab'
+  },
   'health': {
     status: 'ok',
     uptime: 86420,
