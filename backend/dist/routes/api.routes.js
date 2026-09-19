@@ -8,6 +8,22 @@ const command_policy_1 = require("../services/command-policy");
 const router = (0, express_1.Router)();
 const sessionManager = session_manager_1.SessionManager.getInstance();
 const flagService = flag_service_1.FlagService.getInstance();
+// API Root / Service Info
+router.get('/', (req, res) => {
+    res.json({
+        service: 'Cyber Lab Backend API & Orchestrator',
+        status: 'online',
+        version: '2.9.0',
+        endpoints: {
+            root: '/api',
+            health: '/api/health',
+            labs: '/api/labs',
+            sessions: '/api/sessions',
+            progress: '/api/progress'
+        },
+        documentation: 'https://github.com/Kartik-baniwal/Cyber-Lab'
+    });
+});
 // Health Check
 router.get('/health', (req, res) => {
     res.json({
@@ -112,14 +128,17 @@ router.post('/sessions/:id/command', async (req, res) => {
         return res.status(400).json({ error: 'No command provided' });
     }
     const cleanCmd = command.trim();
-    if ((0, command_policy_1.blocksPwd)(session, cleanCmd)) {
+    if ((0, command_policy_1.blocksCommand)(session, cleanCmd)) {
         return res.json({
             command: cleanCmd,
-            output: `${command_policy_1.PWD_BLOCKED_MESSAGE}\n`,
+            output: `${command_policy_1.COMMAND_BLOCKED_MESSAGE}\n`,
             exitCode: 126,
             completedObjectives: session.completedObjectives
         });
     }
+    const result = await sessionManager.getDriver().executeCommand(session, cleanCmd);
+    if (result.exitCode !== 0)
+        return res.json({ command: cleanCmd, output: result.stdout, exitCode: result.exitCode, completedObjectives: session.completedObjectives });
     const lowCmd = cleanCmd.toLowerCase();
     const cmd0 = (session.lab.commands[0] || '').toLowerCase();
     const cmd1 = (session.lab.commands[1] || '').toLowerCase();
@@ -145,7 +164,6 @@ router.post('/sessions/:id/command', async (req, res) => {
         (cmd1.includes('kill') && lowCmd.includes('kill'))) {
         flagService.completeObjective(session.id, 1);
     }
-    const result = await sessionManager.getDriver().executeCommand(session, cleanCmd);
     res.json({
         command: cleanCmd,
         output: result.stdout,
@@ -182,6 +200,14 @@ router.get('/progress', (req, res) => {
             expiresAt: activeSession.expiresAt,
             completedObjectives: activeSession.completedObjectives
         } : null
+    });
+});
+// 404 fallback for unmatched /api routes
+router.use((req, res) => {
+    res.status(404).json({
+        error: 'API endpoint not found',
+        path: req.originalUrl,
+        availableEndpoints: ['/api', '/api/health', '/api/labs', '/api/sessions', '/api/progress']
     });
 });
 exports.default = router;

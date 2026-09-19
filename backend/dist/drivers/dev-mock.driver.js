@@ -32,8 +32,8 @@ class DevMockDriver {
         const raw = rawCommand.trim();
         // Normalize command by stripping wrappers: sudo, bash, sh, ./, /bin/, /usr/bin/
         let cmd = raw.replace(/^(sudo\s+|bash\s+|sh\s+|\.\/|\/bin\/|\/usr\/bin\/)+/i, '').trim();
-        if ((0, command_policy_1.blocksPwd)(session, cmd)) {
-            return { stdout: `${command_policy_1.PWD_BLOCKED_MESSAGE}\n`, exitCode: 126 };
+        if ((0, command_policy_1.blocksCommand)(session, raw)) {
+            return { stdout: `${command_policy_1.COMMAND_BLOCKED_MESSAGE}\n`, exitCode: 126 };
         }
         const l = session.lab;
         const isKali = session.os === 'Kali Linux';

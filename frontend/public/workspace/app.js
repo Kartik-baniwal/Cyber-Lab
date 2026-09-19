@@ -2355,7 +2355,8 @@ function renderUbuntuDesktop(container) {
 }
 
 function renderLiveKaliDesktop(container) {
-  const date = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const date = new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit' });
+  const home = session.lab.id === 'linux' ? '/home/learner/lab' : '/root';
   container.innerHTML = `
     <div class="kali-live-desktop">
       <header class="kali-live-panel"><button id="kali-live-activities">Applications</button><span>${date}</span><span aria-label="Kali session">Kali Rolling <span aria-hidden="true"> · ◉</span></span></header>
@@ -2386,16 +2387,16 @@ function renderLiveKaliDesktop(container) {
     content.className = terminal ? 'kali-live-terminal' : 'kali-live-app-content';
     content.replaceChildren();
   };
-  const terminal = () => { show('Terminal — root@kali: ~', true); screen(content, true); };
+  const terminal = () => { show(session.lab.id === 'linux' ? 'Terminal — learner@kali: ~/lab' : 'Terminal — root@kali: ~', true); screen(content, true); };
   const files = async () => {
-    show('Files — /root');
-    content.innerHTML = '<div class="kali-live-file-toolbar">Home / root <button id="kali-live-refresh-files">Refresh</button></div><pre class="kali-live-file-output">Loading container files…</pre>';
+    show('Files — ' + home);
+    content.innerHTML = '<div class="kali-live-file-toolbar">Home directory <button id="kali-live-refresh-files">Refresh</button></div><pre class="kali-live-file-output">Loading container files…</pre>';
     const output = content.querySelector('pre');
     content.querySelector('button').onclick = files;
     try {
       if (!isLiveApi) throw new Error('Launch a live Kali session to view container files.');
       const response = await fetch(`${API_BASE}/api/sessions/${session.id}/command`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: 'ls -lah /root' })
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: 'ls -lah ' + home })
       });
       if (!response.ok) throw new Error('Could not read container files. Reconnect your session and try again.');
       const result = await response.json();
@@ -3709,7 +3710,7 @@ function screen(targetContainer = null, desktopTerminal = false) {
     if (window.Terminal && isLiveApi && session && session.id) {
       container.innerHTML = `
         <div class="termhead" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>${session.os === 'Ubuntu' ? 'Terminal — root@ubuntu: ~' : 'Terminal — root@kali: ~'}</span>
+          <span>${session.os === 'Ubuntu' ? 'Terminal — root@ubuntu: ~' : (session.lab.id === 'linux' ? 'Terminal — learner@kali: ~/lab' : 'Terminal — root@kali: ~')}</span>
           <div style="display:flex; align-items:center; gap:8px;">
             <div class="term-zoom-cluster">
               <button class="term-action-btn" id="term-zoom-out" title="${isModalFullscreen ? 'Zoom Out / Exit Full Screen (Ctrl −)' : 'Zoom Out Terminal Font (Ctrl −)'}">
@@ -3730,6 +3731,7 @@ function screen(targetContainer = null, desktopTerminal = false) {
             <span style="font-size:10px; color:#8fab51;">${session.os === 'Ubuntu' ? '● Live Ubuntu shell' : '● Live Kali shell'}</span>
           </div>
         </div>
+        ${['linux', 'recon', 'web'].includes(session.lab.id) && session.os === 'Kali Linux' ? `<details style="padding:12px; color:#c6d0e0;"><summary>${escapeHtml(session.lab.name)} · installed tools</summary><p style="line-height:1.8; margin-top:8px;">Run <code>kali-tools ${session.lab.id === 'linux' ? 'linux' : session.lab.id}</code> to list installed packages and versions, or <code>kali-tools all</code> for all three collections. Use <code>dpkg -L &lt;package&gt;</code> to locate its commands.</p><p>Bash, scripts, pipelines, and sudo are available. Graphical tools require a real desktop display.</p></details>` : ''}
         <div id="xterm-container" style="min-height:380px; height:100%; background:${session.os === 'Ubuntu' ? '#300a24' : '#17191f'}; border-radius:6px; padding:8px; overflow:hidden;"></div>
       `;
 

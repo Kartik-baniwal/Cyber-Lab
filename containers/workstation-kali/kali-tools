@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Display real installed tool inventories using dpkg metadata, never canned output."""
+import re
+import subprocess
+import sys
+
+GROUPS = {
+    'web': ['kali-tools-web'],
+    'recon': ['kali-tools-information-gathering', 'kali-tools-vulnerability', 'kali-tools-sniffing-spoofing'],
+    'linux': 'bash bash-completion coreutils findutils diffutils grep sed gawk util-linux procps psmisc file tree plocate less man-db manpages manpages-dev info nano vim-tiny tar gzip bzip2 xz-utils zip unzip sudo passwd acl attr rsync lsof strace time bc jq curl wget git openssh-client net-tools iproute2 iputils-ping iputils-tracepath bind9-dnsutils traceroute whois netcat-openbsd tcpdump python3 python3-pip build-essential cron logrotate'.split(),
+}
+category = sys.argv[1] if len(sys.argv) > 1 else 'all'
+if category not in (*GROUPS, 'all'):
+    sys.exit('Usage: kali-tools [web|recon|linux|all]')
+rows = subprocess.check_output(['dpkg-query', '-W', '-f=${Package}\t${Version}\t${Status}\t${Depends}\t${Recommends}\n'], text=True)
+installed = {}
+for row in rows.splitlines():
+    name, version, status, depends, recommends = row.split('\t', 4)
+    if status == 'install ok installed':
+        installed[name] = (version, depends + ', ' + recommends)
+for label, roots in GROUPS.items():
+    if category != 'all' and category != label:
+        continue
+    packages = set(roots)
+    # Include direct dependencies of category metapackages and nested collections.
+    pending = [name for name in roots if name.startswith('kali-')]
+    visited = set()
+    while pending:
+        name = pending.pop()
+        if name in visited:
+            continue
+        visited.add(name)
+        for clause in installed.get(name, ('', ''))[1].split(','):
+            for alternative in clause.split('|'):
+                match = re.match(r'\s*([a-z0-9][a-z0-9+.-]*)', alternative)
+                if match and match[1] in installed:
+                    dependency = match[1]
+                    packages.add(dependency)
+                    if dependency.startswith('kali-'):
+                        pending.append(dependency)
+                    break
+    print(f'\n{label.upper()} — installed packages and versions')
+    for name in sorted(packages):
+        print(f'{name:40} {installed.get(name, ("NOT INSTALLED",))[0]}')
+print('\nUse dpkg -L <package> to locate its commands; <command> --help or man <command> for usage.')
+print('GUI tools need a real graphical display. Full package manifest: /usr/local/share/kali-lab/packages.tsv')

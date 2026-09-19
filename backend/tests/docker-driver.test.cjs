@@ -55,3 +55,12 @@ test('missing Ubuntu image reports its own build script without falling back to 
     await assert.rejects(new DockerDriver().provisionSession({ ...session, os: 'Ubuntu' }), /Ubuntu image.*build-ubuntu-image.sh/);
   } finally { delete process.env.TEST_MISSING_IMAGE; }
 });
+test('fundamentals API uses the learner workspace and real Bash', async () => {
+  const offset = fs.readFileSync(log, 'utf8').length;
+  await new DockerDriver().executeCommand({ ...session, labId: 'linux' }, 'pwd | cat');
+  const calls = fs.readFileSync(log, 'utf8').slice(offset).trim().split('\n').map(JSON.parse);
+  const execute = calls.find(args => args.at(-1) === 'pwd | cat');
+  assert.deepEqual(execute.slice(0, 5), ['exec', '-u', 'learner', '-w', '/home/learner/lab']);
+  assert.deepEqual(execute.slice(-3), ['/bin/bash', '-c', 'pwd | cat']);
+  assert.ok(calls.some(args => args.some(arg => arg.includes('mkdir -p /home/learner/lab'))));
+});

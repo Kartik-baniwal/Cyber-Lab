@@ -22,9 +22,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
       sudo net-tools iproute2 iputils-ping dnsutils python3 util-linux && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Report installed packages rather than a simulated tool inventory.
-RUN printf '#!/bin/sh\ndpkg-query -W kali-linux-default kali-desktop-xfce\ncommand -v nmap msfconsole sqlmap hydra john wireshark gobuster\n' > /usr/local/bin/kali-tools && \
-    chmod +x /usr/local/bin/kali-tools
+# Complete category collections and an inventory generated from installed packages.
+COPY install-lab-tools.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-lab-tools.sh && \
+    /usr/local/bin/install-lab-tools.sh
+COPY kali-tools /usr/local/bin/
+RUN chmod +x /usr/local/bin/kali-tools
 
 # 2. Setup root environment and learner user
 RUN mkdir -p /root/lab /root/wordlists /root/exploits && \

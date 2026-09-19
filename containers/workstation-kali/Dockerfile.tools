@@ -1,0 +1,8 @@
+# Upgrade an existing workstation without rebuilding its desktop from scratch.
+FROM rangeforge/kali-custom:latest
+USER root
+COPY install-lab-tools.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-lab-tools.sh && \
+    /usr/local/bin/install-lab-tools.sh
+COPY kali-tools /usr/local/bin/
+RUN chmod +x /usr/local/bin/kali-tools

@@ -85,3 +85,32 @@ VM kernel or direct Wi-Fi hardware access. The existing web desktop UI is still
 simulated; installing XFCE in the image does not connect that UI to a VNC server.
 
 Each Docker lab is limited to **4 vCPU · 3.5 GB RAM** (`--cpus 4 --memory 3584m --memory-swap 3584m`). Allocate at least 4 GB total memory to Docker so the host and lab have sufficient room.
+
+## Complete module tool collections
+
+The Kali workstation installs the complete Kali-maintained `kali-tools-web`,
+`kali-tools-information-gathering`, `kali-tools-vulnerability`, and
+`kali-tools-sniffing-spoofing` collections, with recommended dependencies.
+Linux fundamentals includes Bash, GNU file/text utilities, permissions and user
+administration, process tools, archives, editors, manuals, compilers, Python,
+SSH, and network utilities. All three modules use normal Bash shells; Linux
+fundamentals starts as `learner`, with `sudo` available.
+
+Run `kali-tools web`, `kali-tools recon`, or `kali-tools linux` for actual installed
+package versions. `dpkg -L <package>` locates a package's executable files. The
+full build inventory is `/usr/local/share/kali-lab/packages.tsv` inside Kali.
+Category membership follows Kali Rolling and the host architecture; this does
+not claim every third-party security tool is available in Kali's repositories.
+GUI packages still require a real display; the simulated Desktop tab does not
+launch them. Kernel, hardware, and systemd-dependent features retain Docker's
+normal limitations.
+
+To upgrade an existing workstation image without rebuilding its desktop:
+
+```bash
+bash scripts/build-kali-image.sh --upgrade
+```
+
+Use the script without `--upgrade` for a clean image build. Existing containers
+keep their original image: save lab work, end the session, and launch a new one
+after rebuilding to use the updated tools.
